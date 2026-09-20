@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  DEBUG build only. Allows plaintext HTTP to the emulator's host-loopback
+  alias (10.0.2.2) so the app can talk to `python3 app.py` running on the
+  developer's machine without setting up TLS for local development.
+  This file does not exist in the release variant (see
+  src/release/res/xml/network_security_config.xml) -- the assignment's APK
+  inspection step should find no cleartext permission in the signed release
+  APK at all.
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">10.0.2.2</domain>
+    </domain-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

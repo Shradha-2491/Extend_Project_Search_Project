@@ -1,0 +1,8 @@
+=== Test 1: 10 concurrent requests, same stale version, distinct Idempotency-Keys ===
+status codes: [200, 409, 409, 409, 409, 409, 409, 409, 409, 409]
+PASS: exactly one writer won the race; final version: 2
+
+=== Test 2: 10 concurrent requests, SAME Idempotency-Key (duplicate submit) ===
+status codes: [200, 200, 200, 200, 200, 200, 200, 200, 200, 200]
+distinct versions returned to callers: {3}
+PASS: exactly one price change applied despite 10 concurrent duplicate requests

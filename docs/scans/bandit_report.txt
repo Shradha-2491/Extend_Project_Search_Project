@@ -1,0 +1,114 @@
+Run started:2026-09-20 12:54:38.394962+00:00
+
+Test results:
+>> Issue: [B608:hardcoded_sql_expressions] Possible SQL injection vector through string-based query construction.
+   Severity: Medium   Confidence: Low
+   CWE: CWE-89 (https://cwe.mitre.org/data/definitions/89.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html
+   Location: ./app.py:146:15
+145	        ctx["attempted"] = True
+146	        sql = ("SELECT id, username, role FROM users "
+147	               f"WHERE username = '{username}' AND password = '{password}'")
+148	        ctx["sql_display"] = sql
+
+--------------------------------------------------
+>> Issue: [B608:hardcoded_sql_expressions] Possible SQL injection vector through string-based query construction.
+   Severity: Medium   Confidence: Low
+   CWE: CWE-89 (https://cwe.mitre.org/data/definitions/89.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html
+   Location: ./app.py:215:16
+214	        ctx["term"] = term
+215	        sql = f"SELECT id, name, category, price FROM products WHERE name LIKE '%{term}%'"
+216	        ctx["sql_display"] = sql
+
+--------------------------------------------------
+>> Issue: [B404:blacklist] Consider possible security implications associated with the subprocess module.
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b404-import-subprocess
+   Location: ./db.py:7:0
+6	import threading
+7	import subprocess
+8	import sqlite3
+
+--------------------------------------------------
+>> Issue: [B105:hardcoded_password_string] Possible hardcoded password: '
+<h1>Forgot password</h1>
+<form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <p>Username or email: <input name="identifier"></p>
+  <button type="submit">Send reset instructions</button>
+</form>
+{% if sent %}
+  <div class="ok">If an account exists, reset instructions were written to
+  <code>backend/mail_outbox/</code> (this lab has no real mail relay).</div>
+{% endif %}
+'
+   Severity: Low   Confidence: Medium
+   CWE: CWE-259 (https://cwe.mitre.org/data/definitions/259.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b105_hardcoded_password_string.html
+   Location: ./templates.py:228:30
+227	# text, not a credential.
+228	PASSWORD_RESET_REQUEST_BODY = """
+229	<h1>Forgot password</h1>
+230	<form method="post">
+231	  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+232	  <p>Username or email: <input name="identifier"></p>
+233	  <button type="submit">Send reset instructions</button>
+234	</form>
+235	{% if sent %}
+236	  <div class="ok">If an account exists, reset instructions were written to
+237	  <code>backend/mail_outbox/</code> (this lab has no real mail relay).</div>
+238	{% endif %}
+239	"""
+240	
+
+--------------------------------------------------
+>> Issue: [B105:hardcoded_password_string] Possible hardcoded password: '
+<h1>Reset password</h1>
+<form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <p>Reset token: <input name="token" value="{{ token }}"></p>
+  <p>New password (min 10 chars): <input name="new_password" type="password"></p>
+  <button type="submit">Reset</button>
+</form>
+{% if error %}<div class="err">{{ error }}</div>{% endif %}
+{% if success %}<div class="ok">Password updated. <a href="/login2">Log in</a>.</div>{% endif %}
+'
+   Severity: Low   Confidence: Medium
+   CWE: CWE-259 (https://cwe.mitre.org/data/definitions/259.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b105_hardcoded_password_string.html
+   Location: ./templates.py:242:30
+241	# nosec B105 -- same false positive as PASSWORD_RESET_REQUEST_BODY above.
+242	PASSWORD_RESET_CONFIRM_BODY = """
+243	<h1>Reset password</h1>
+244	<form method="post">
+245	  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+246	  <p>Reset token: <input name="token" value="{{ token }}"></p>
+247	  <p>New password (min 10 chars): <input name="new_password" type="password"></p>
+248	  <button type="submit">Reset</button>
+249	</form>
+250	{% if error %}<div class="err">{{ error }}</div>{% endif %}
+251	{% if success %}<div class="ok">Password updated. <a href="/login2">Log in</a>.</div>{% endif %}
+252	"""
+253	
+
+--------------------------------------------------
+
+Code scanned:
+	Total lines of code: 2234
+	Total lines skipped (#nosec): 0
+	Total potential issues skipped due to specifically being disabled (e.g., #nosec BXXX): 3
+
+Run metrics:
+	Total issues (by severity):
+		Undefined: 0
+		Low: 3
+		Medium: 2
+		High: 0
+	Total issues (by confidence):
+		Undefined: 0
+		Low: 2
+		Medium: 2
+		High: 1
+Files skipped (0):

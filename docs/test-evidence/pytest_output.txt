@@ -1,0 +1,25 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- /home/ubuntu/Downloads/Extended_Project_Search/backend/.venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/ubuntu/Downloads/Extended_Project_Search/backend
+collecting ... collected 17 items
+
+tests/test_csrf_and_audit.py::test_web_post_without_csrf_token_is_rejected PASSED [  5%]
+tests/test_csrf_and_audit.py::test_web_post_with_valid_csrf_token_succeeds PASSED [ 11%]
+tests/test_csrf_and_audit.py::test_audit_log_tamper_is_detected PASSED   [ 17%]
+tests/test_mfa_and_google.py::test_password_only_login_cannot_reach_products PASSED [ 23%]
+tests/test_mfa_and_google.py::test_wrong_mfa_code_is_rejected_and_locks_out_after_repeated_failures PASSED [ 29%]
+tests/test_mfa_and_google.py::test_google_email_verified_missing_claim_is_rejected_fail_closed PASSED [ 35%]
+tests/test_price_protection.py::test_price_update_requires_idempotency_key PASSED [ 41%]
+tests/test_price_protection.py::test_stale_version_is_rejected_with_409 PASSED [ 47%]
+tests/test_price_protection.py::test_duplicate_idempotency_key_returns_cached_response_once PASSED [ 52%]
+tests/test_price_protection.py::test_vendor_cannot_change_price_of_others_product PASSED [ 58%]
+tests/test_rbac.py::test_customer_search_hides_cost_and_inactive PASSED  [ 64%]
+tests/test_rbac.py::test_vendor_search_sees_only_own_inventory_with_cost_stock PASSED [ 70%]
+tests/test_rbac.py::test_admin_search_sees_audit_fields PASSED           [ 76%]
+tests/test_rbac.py::test_customer_cannot_create_product PASSED           [ 82%]
+tests/test_rbac.py::test_vendor_cannot_edit_another_vendors_product PASSED [ 88%]
+tests/test_rbac.py::test_no_bearer_token_is_unauthorized PASSED          [ 94%]
+tests/test_rbac.py::test_admin_only_user_admin_endpoints PASSED          [100%]
+
+============================= 17 passed in 14.43s ==============================

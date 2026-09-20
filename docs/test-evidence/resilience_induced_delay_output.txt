@@ -1,0 +1,6 @@
+[lock-holder] acquired write lock, holding for 3s ...
+[requester] sending price update while the lock is held ...
+[lock-holder] released write lock
+[requester] got status 200 after waiting 2.76s
+[requester] body: {'active': 1, 'category': 'Computers', 'cost': 30.0, 'id': 3, 'name': 'Monitor', 'price': 77.77, 'stock': 40, 'version': 2}
+PASS: request queued behind the held lock and completed correctly -- no partial write, no corruption, graceful (slower, not broken) degradation.

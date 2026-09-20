@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  RELEASE build. No cleartext traffic anywhere, and certificate pinning on
+  the classroom API host. Replace YOUR-CLASSROOM-HOST and the two pins below
+  with your real server before building/signing -- generate a pin with:
+
+    openssl s_client -connect YOUR-CLASSROOM-HOST:5001 -servername YOUR-CLASSROOM-HOST \
+      </dev/null 2>/dev/null | openssl x509 -pubkey -noout \
+      | openssl pkey -pubin -outform der \
+      | openssl dgst -sha256 -binary | openssl enc -base64
+
+  Always configure a SECOND (backup) pin from a not-yet-deployed key/cert so
+  you can rotate the certificate without bricking already-installed apps.
+  This is exactly what the assignment's MITM-proxy demonstration should show
+  failing closed: a proxy's substituted certificate does not match either
+  pin, so the TLS handshake is rejected and no request data reaches it.
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">YOUR-CLASSROOM-HOST</domain>
+        <pin-set expiration="2027-12-31">
+            <pin digest="SHA-256">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</pin>
+            <pin digest="SHA-256">BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=</pin>
+        </pin-set>
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

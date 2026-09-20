@@ -1,0 +1,28 @@
+# Secrets -- never commit/zip the real .env, only .env.example
+backend/.env
+.env
+
+# Local runtime artifacts
+backend/lab.db
+backend/audit.db
+backend/audit.log
+backend/mail_outbox/
+lab.db
+audit.db
+audit.log
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Android build output
+mobile/**/build/
+mobile/**/.gradle/
+mobile/**/local.properties
+mobile/**/*.apk
+mobile/**/*.aab
+mobile/**/*.jks
+mobile/**/*.keystore
+
+# Packaging output
+*.zip

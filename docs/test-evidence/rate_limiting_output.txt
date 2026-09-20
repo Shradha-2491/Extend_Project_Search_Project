@@ -1,0 +1,8 @@
+=== Rate limiting evidence: /api/v1/auth/login is capped at 5/minute ===
+attempt 1 -> HTTP 401
+attempt 2 -> HTTP 401
+attempt 3 -> HTTP 401
+attempt 4 -> HTTP 401
+attempt 5 -> HTTP 401
+attempt 6 -> HTTP 429
+attempt 7 -> HTTP 429
