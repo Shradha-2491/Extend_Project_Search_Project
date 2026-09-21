@@ -167,7 +167,8 @@ class AppViewModel : ViewModel() {
             try {
                 block()
             } catch (e: Exception) {
-                errorMessage = "network_error"
+                e.printStackTrace()
+                errorMessage = "${e.javaClass.simpleName}: ${e.message}"
             } finally {
                 loading = false
             }

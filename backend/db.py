@@ -39,10 +39,10 @@ def like_escape(term: str) -> str:
 def init_db():
     con = connect()
     cur = con.cursor()
-    cur.execute("DROP TABLE IF EXISTS users")
     cur.execute("DROP TABLE IF EXISTS products")
     cur.execute("DROP TABLE IF EXISTS idempotency_keys")
     cur.execute("DROP TABLE IF EXISTS refresh_tokens")
+    cur.execute("DROP TABLE IF EXISTS users")
 
     cur.execute("""
         CREATE TABLE users (
