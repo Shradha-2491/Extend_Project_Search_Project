@@ -17,7 +17,7 @@ import net.openid.appauth.ResponseTypeValues
  * started the flow. The resulting id_token is sent to
  * POST /api/v1/auth/google/mobile, where the backend independently verifies
  * it against Google's public keys (see security.verify_google_id_token_mobile
- * / validate_google_userinfo on the server) -- this app never decides for
+ * / validate_google_userinfo on the server) this app never decides for
  * itself whether the email is verified.
  */
 object GoogleAuthConfig {

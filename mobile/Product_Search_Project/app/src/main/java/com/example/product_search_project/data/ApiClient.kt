@@ -21,7 +21,7 @@ import retrofit2.converter.kotlinx.serialization.asConverterFactory
  *    and response bodies are never written to logcat in a shipped APK.
  *  - TLS/cleartext policy is enforced declaratively via
  *    res/xml/network_security_config.xml (different per build type), not in
- *    this file -- OkHttp automatically honours it on Android.
+ *    this file OkHttp automatically honours it on Android.
  */
 object ApiClient {
 

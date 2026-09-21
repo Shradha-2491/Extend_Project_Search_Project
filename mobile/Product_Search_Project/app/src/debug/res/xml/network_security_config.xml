@@ -4,7 +4,7 @@
   alias (10.0.2.2) so the app can talk to `python3 app.py` running on the
   developer's machine without setting up TLS for local development.
   This file does not exist in the release variant (see
-  src/release/res/xml/network_security_config.xml) -- the assignment's APK
+  src/release/res/xml/network_security_config.xml) - the assignment's APK
   inspection step should find no cleartext permission in the signed release
   APK at all.
 -->
