@@ -42,9 +42,7 @@ requirement.
 cd backend && source .venv/bin/activate
 python3 -m pytest tests/ -v                 # 17 tests: RBAC, price protection, MFA, CSRF, audit-tamper
 
-# with the server running (python3 app.py) in another terminal, and a
-# vendor/admin access_token exported as VENDOR_TOKEN (see the script's
-# docstring for how to get one):
+
 python3 ../docs/test-evidence/concurrency_price_race.py
 python3 ../docs/test-evidence/resilience_induced_delay.py
 
