@@ -22,4 +22,4 @@ tests/test_rbac.py::test_vendor_cannot_edit_another_vendors_product PASSED [ 88%
 tests/test_rbac.py::test_no_bearer_token_is_unauthorized PASSED          [ 94%]
 tests/test_rbac.py::test_admin_only_user_admin_endpoints PASSED          [100%]
 
-============================= 17 passed in 31.93s ==============================
+============================= 17 passed in 29.63s ==============================

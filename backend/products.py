@@ -172,7 +172,11 @@ def update_price(actor, product_id, new_price, expected_version, idem_key):
         if not row:
             status, body = 404, {"error": "not_found"}
         elif not _owns_or_admin(row, actor):
-            status, body = 403, {"error": "forbidden"}
+            # 404, not 403 -- same anti-enumeration reasoning as
+            # update_product_fields/soft_delete: a non-owning vendor must not
+            # be able to distinguish "this product doesn't exist" from "it
+            # exists but isn't yours" by probing IDs against this endpoint.
+            status, body = 404, {"error": "not_found_or_forbidden"}
         else:
             cur = con.execute(
                 "UPDATE products SET price = ?, version = version + 1, updated_at = ?, "

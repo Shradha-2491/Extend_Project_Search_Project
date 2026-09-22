@@ -5,6 +5,38 @@ assignment rules ("do not submit too many scanner screenshots... marks focus
 on implemented security controls and testing"), this file is the part that
 should actually be read.
 
+## Negative-path authorization testing (`docs/test-evidence/negative_authz_matrix.py`)
+
+Beyond the automated scanners, this is a hand-written script that actively
+tries the things each role should be *denied*, not just confirms what it's
+allowed to do -- run against the live API with real issued tokens for a
+customer, two independent vendors, and an admin.
+
+- **25 checks, 25 passed** on the run captured in
+  `negative_authz_matrix_output.txt`: customer blocked from every vendor/
+  admin-only mutation and from ever seeing `cost`/`stock`/inactive listings;
+  vendor blocked from every admin-only endpoint; vendor A blocked from
+  reading, patching, pricing, or deleting vendor B's product; no-token and
+  garbage-token requests rejected with 401; a registration request with
+  `"role": "admin"` in the body is silently downgraded to `customer`; admin
+  confirmed to still be able to do all of the above (so the restrictions
+  aren't just broken/over-broad in the other direction).
+- **Real bug found and fixed by this test**: `products.update_price()`'s
+  ownership check returned **403** ("forbidden") for a vendor touching
+  another vendor's product, while the sibling endpoints
+  `update_product_fields`/`soft_delete` deliberately return **404**
+  ("not_found_or_forbidden") for the identical situation, specifically so a
+  non-owning vendor can't tell "this id doesn't exist" apart from "it exists
+  but isn't yours" by probing ids (anti-enumeration; see the A01 row of the
+  OWASP table). The price endpoint -- arguably the most sensitive one -- was
+  the one leaking that distinction. Fixed to match the established 404
+  pattern; `tests/test_price_protection.py::test_vendor_cannot_change_price_of_others_product`
+  updated to assert the corrected status code; full suite (17/17) and the
+  negative-authz script (25/25) both re-run clean after the fix.
+- **OWASP mapping**: A01 - Broken Access Control (this is the same
+  anti-IDOR control already documented there; this finding is that one
+  endpoint didn't actually follow it).
+
 ## Dependency vulnerabilities (`pip-audit`)
 
 - **Before fix**: `pip_audit_raw` run found 10 known CVEs, all in one
