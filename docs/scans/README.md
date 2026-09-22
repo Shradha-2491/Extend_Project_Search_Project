@@ -82,7 +82,7 @@ the PATH-resolution fix).
 All of the following now have real, reproducible output in
 `docs/scans/mobile/`, generated 2026-09-22 once an Android SDK/emulator
 became available in this environment (they were previously blocked and
-left as a manual checklist — see `docs/mobile-security-checklist.md`):
+left as a manual checklist — see `docs/doc-pdf/mobile-security-checklist.pdf`):
 
 - `apk_secret_scan.txt` — release APK unzipped and grepped for
   `client_secret`/`GOCSPX-`/API keys/PEM private keys. Clean; the only

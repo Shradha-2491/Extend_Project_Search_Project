@@ -21,7 +21,7 @@
           Android Keystore and does NOT travel with a backup) to the user's
           Google account - disabling it removes that class of insecure
           local-storage exposure entirely rather than relying on encryption
-          alone. See docs/mobile-security-checklist.md.
+          alone. See docs/doc-pdf/mobile-security-checklist.pdf.
         -->
         <activity
             android:name=".MainActivity"

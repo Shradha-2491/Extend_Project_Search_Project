@@ -1,7 +1,7 @@
 """Centralized, reusable security controls shared by the web routes, the JSON
 REST API, and (indirectly, via the API) the mobile app. Every RBAC check,
 token operation, and piece of crypto in this project goes through here so
-there is exactly one place to audit or fix -- see docs/owasp-control-table.md
+there is exactly one place to audit or fix -- see docs/doc-pdf/owasp-control-table.pdf
 for the mapping of each control below to the OWASP risks it addresses.
 """
 import base64

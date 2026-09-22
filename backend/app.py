@@ -121,7 +121,7 @@ def logout():
 # Legacy OWASP injection-lab routes (unchanged behaviour): a deliberately
 # vulnerable login/search pair next to a parameterized-query secure pair.
 # Kept as-is -- they are the Injection row's test evidence in
-# docs/owasp-control-table.md and are not part of the extended app's RBAC.
+# docs/doc-pdf/owasp-control-table.pdf and are not part of the extended app's RBAC.
 # ---------------------------------------------------------------------------
 
 @app.route("/login", methods=["GET", "POST"])

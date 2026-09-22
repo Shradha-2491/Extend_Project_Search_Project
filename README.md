@@ -181,7 +181,7 @@ Building, signing, and inspecting the release APK for secrets/debuggable
 flags, and verifying `TokenStore`'s encrypted local storage, are all
 runnable with the Android SDK's own `build-tools` (`apksigner`, `aapt`,
 `zipalign` — no extra tools needed for these three). Full step-by-step
-commands: `docs/mobile-security-checklist.md`. Evidence from the last run:
+commands: `docs/doc-pdf/mobile-security-checklist.pdf`. Evidence from the last run:
 `docs/scans/mobile/`.
 
 ## 5. Deliverables map
@@ -189,10 +189,10 @@ commands: `docs/mobile-security-checklist.md`. Evidence from the last run:
 | Deliverable | Location |
 |---|---|
 | Source code | `backend/`, `mobile/` |
-| Threat model | `docs/threat-model.md` |
-| OWASP Risk → Control → Implementation → Component → Test Evidence table | `docs/owasp-control-table.md` |
+| Threat model | `docs/doc-pdf/threat-model.pdf` |
+| OWASP Risk → Control → Implementation → Component → Test Evidence table | `docs/doc-pdf/owasp-control-table.pdf` |
 | SBOM | `docs/sbom/backend-sbom.json` (32 components, `pip-audit --format=cyclonedx-json`), `docs/sbom/mobile-sbom.json` (282 components, CycloneDX Gradle plugin — regenerate with `./gradlew cyclonedxBom`) — both tool-generated against the actual current dependency graph, not hand-authored |
-| Scan reports + explanations | `docs/scans/README.md` (read this one), `docs/scans/bandit_report.txt`, `docs/scans/pip_audit_after_fix.txt`, `docs/scans/mobile/` |
+| Scan reports + explanations | `docs/scans/README.md` or `docs/doc-pdf/scan-reports-explained.pdf` (read this one), `docs/scans/bandit_report.txt`, `docs/scans/pip_audit_after_fix.txt`, `docs/scans/mobile/` |
 | Test evidence (incl. concurrency/resilience) | `docs/test-evidence/` |
 
 ## 6. Assignment objective checklist
@@ -201,7 +201,7 @@ commands: `docs/mobile-security-checklist.md`. Evidence from the last run:
 |---|---|
 | Add/update/remove/search/view products | `backend/products.py` + `api_products.py` (`POST/PATCH/DELETE/GET /api/v1/products`) and `web.py` (`/products/*`) |
 | Restrict product removal to authorized users | `security.role_required("vendor","admin")` / `api_role_required`, ownership re-checked in `products.soft_delete` |
-| Define roles and permissions | `customer` / `vendor` / `admin` — see `docs/threat-model.md` §3 and the RBAC rows of `docs/owasp-control-table.md` |
+| Define roles and permissions | `customer` / `vendor` / `admin` — see `docs/doc-pdf/threat-model.pdf` §3 and the RBAC rows of `docs/doc-pdf/owasp-control-table.pdf` |
 | Role-scoped search (different fields/results per role) | `products.search()` / `visible_fields()` — one function for Web+API+Mobile; `tests/test_rbac.py` |
 | Restrict price/total changes to authorized roles | `api_products.py::patch_price`, `web.py::product_price` — vendor-own or admin only |
 | Protect against race conditions on price-sensitive ops | `products.update_price()` (version + Idempotency-Key in one transaction); `docs/test-evidence/concurrency_price_race.py` (verified: 10 concurrent stale writes → 1 winner + 9×409; 10 duplicate submits → exactly 1 applied) |
@@ -209,15 +209,15 @@ commands: `docs/mobile-security-checklist.md`. Evidence from the last run:
 | Instructor-approved MFA implemented and enforced | TOTP (`mfa.py`), mandatory for every account before a full session/token is issued (`auth_service`, `web.py`, `api_auth.py`) |
 | Restrict user add/remove/update to admin | `users_admin.py` + `security.role_required("admin")`/`api_role_required("admin")`; `web.py::admin_users`, `api_admin.py` |
 | Web, Mobile, API interfaces with consistent controls | Web (`web.py`/`app.py`), API (`api_*.py`), Mobile (`mobile/Product_Search_Project`) — all three call the same `security.py`/`products.py`/`auth_service.py`/`users_admin.py` functions |
-| Google Sign-In implemented properly on Web and Mobile, `email_verified` actually checked | `security.validate_google_userinfo` (fixed to fail-closed — see `docs/threat-model.md` §7), `security.verify_google_id_token_mobile` (independent id_token verification for Mobile, via Credential Manager — see section 4 above); `tests/test_mfa_and_google.py` |
+| Google Sign-In implemented properly on Web and Mobile, `email_verified` actually checked | `security.validate_google_userinfo` (fixed to fail-closed — see `docs/doc-pdf/threat-model.pdf` §7), `security.verify_google_id_token_mobile` (independent id_token verification for Mobile, via Credential Manager — see section 4 above); `tests/test_mfa_and_google.py` |
 | Mobile: inspect release APK for secrets/insecure storage/debug flags | **Done** — `docs/scans/mobile/apk_secret_scan.txt`, `apk_debuggable_check.txt`, `local_storage_check.txt`. Clean: no secrets, non-debuggable, `allowBackup=false`, R8 minification confirmed active, tokens stored encrypted (AES-256-SIV/GCM). |
 | Mobile: demonstrate TLS enforcement / cert handling on a hostile network | **Done** — `docs/scans/mobile/mitm_pinning_test.txt`, against a synthetic local HTTPS host (see section 4). Substituted-certificate connection fails closed with `SSLHandshakeException`; legitimate certificate works; both confirmed against the real signed, R8-minified release build. |
-| Threat model | `docs/threat-model.md` |
-| OWASP risk mapping table | `docs/owasp-control-table.md` |
+| Threat model | `docs/doc-pdf/threat-model.pdf` |
+| OWASP risk mapping table | `docs/doc-pdf/owasp-control-table.pdf` |
 | SBOM | `docs/sbom/` — both real, tool-generated, complete dependency inventories (see section 5) |
-| Scan reports with explanations | `docs/scans/README.md` |
+| Scan reports with explanations | `docs/scans/README.md` / `docs/doc-pdf/scan-reports-explained.pdf` |
 | Test evidence incl. concurrency/resilience | `docs/test-evidence/` — pytest 17/17 passing, concurrency race PASS, induced-delay resilience PASS, rate-limit evidence included |
-| Controls reusable/centralized, mapped to all applicable risks | `security.py`, `auth_service.py`, `products.py`, `users_admin.py` are each imported by every interface that needs them; `docs/owasp-control-table.md` marks each with **(shared)** and lists every risk it addresses |
+| Controls reusable/centralized, mapped to all applicable risks | `security.py`, `auth_service.py`, `products.py`, `users_admin.py` are each imported by every interface that needs them; `docs/doc-pdf/owasp-control-table.pdf` marks each with **(shared)** and lists every risk it addresses |
 
 ## 7. What was reused vs. added
 
