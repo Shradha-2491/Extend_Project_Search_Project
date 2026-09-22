@@ -14,7 +14,8 @@ retrofit = "2.11.0"
 retrofitKotlinxSerializationConverter = "1.0.0"
 okhttp = "4.12.0"
 securityCrypto = "1.1.0-alpha06"
-appauth = "0.11.1"
+credentials = "1.6.0"
+googleid = "1.1.1"
 navigationCompose = "2.8.5"
 
 [libraries]
@@ -40,10 +41,13 @@ retrofit-kotlinx-serialization-converter = { group = "com.squareup.retrofit2", n
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 okhttp-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "securityCrypto" }
-appauth = { group = "net.openid", name = "appauth", version.ref = "appauth" }
+androidx-credentials = { group = "androidx.credentials", name = "credentials", version.ref = "credentials" }
+androidx-credentials-play-services-auth = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "credentials" }
+googleid = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleid" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+cyclonedx-bom = { id = "org.cyclonedx.bom", version = "3.4.1" }
 

@@ -1,1 +1,236 @@
-{"components": [{"bom-ref": "BomRef.2585005456317706.4230208136482163", "name": "Authlib", "type": "library", "version": "1.8.0"}, {"bom-ref": "BomRef.8672708059728946.4463997762243702", "name": "Deprecated", "type": "library", "version": "1.3.1"}, {"bom-ref": "BomRef.1507710281742789.6110313805863352", "name": "Flask", "type": "library", "version": "3.1.3"}, {"bom-ref": "BomRef.9771255932776772.2755625632795293", "name": "Flask-Limiter", "type": "library", "version": "4.1.1"}, {"bom-ref": "BomRef.050879670100266616.3887937969278562", "name": "Jinja2", "type": "library", "version": "3.1.6"}, {"bom-ref": "BomRef.850168987435196.919024087205839", "name": "MarkupSafe", "type": "library", "version": "3.0.3"}, {"bom-ref": "BomRef.24339875774241837.45172563835933144", "name": "PyJWT", "type": "library", "version": "2.14.0"}, {"bom-ref": "BomRef.47649476119376466.3340449618443627", "name": "PyOTP", "type": "library", "version": "2.10.0"}, {"bom-ref": "BomRef.7676286867262253.797193314543251", "name": "Werkzeug", "type": "library", "version": "3.1.8"}, {"bom-ref": "BomRef.48659619758192785.5992626631369692", "name": "blinker", "type": "library", "version": "1.9.0"}, {"bom-ref": "BomRef.14707778158064222.6125711939481899", "name": "certifi", "type": "library", "version": "2026.7.22"}, {"bom-ref": "BomRef.7458891831264738.9177405973722382", "name": "cffi", "type": "library", "version": "2.1.1"}, {"bom-ref": "BomRef.06692414663803226.7653130692504316", "name": "charset-normalizer", "type": "library", "version": "3.5.1"}, {"bom-ref": "BomRef.8034323974625658.04911780588796055", "name": "click", "type": "library", "version": "8.5.0"}, {"bom-ref": "BomRef.9975654885021725.38805174228818506", "name": "cryptography", "type": "library", "version": "50.0.1"}, {"bom-ref": "BomRef.2730896641550694.020938101221575023", "name": "google-auth", "type": "library", "version": "2.58.0"}, {"bom-ref": "BomRef.5585491217192199.5126117681606366", "name": "idna", "type": "library", "version": "3.20"}, {"bom-ref": "BomRef.8666617199891004.9268999121637416", "name": "itsdangerous", "type": "library", "version": "2.2.0"}, {"bom-ref": "BomRef.7353067276939234.614341620950565", "name": "joserfc", "type": "library", "version": "1.7.5"}, {"bom-ref": "BomRef.5716932027988575.7399962998987576", "name": "limits", "type": "library", "version": "5.8.0"}, {"bom-ref": "BomRef.6675096428536283.8794391469173217", "name": "ordered-set", "type": "library", "version": "4.1.0"}, {"bom-ref": "BomRef.21287401879514434.10368524824562075", "name": "pillow", "type": "library", "version": "12.3.0"}, {"bom-ref": "BomRef.3810327916749888.06474820129219083", "name": "pyasn1", "type": "library", "version": "0.6.4"}, {"bom-ref": "BomRef.5630687667671888.19324434564941206", "name": "pyasn1_modules", "type": "library", "version": "0.4.2"}, {"bom-ref": "BomRef.7352481613447417.9984634747006796", "name": "pycparser", "type": "library", "version": "3.0"}, {"bom-ref": "BomRef.09483812231142208.2569990275669606", "name": "pypng", "type": "library", "version": "0.20220715.0"}, {"bom-ref": "BomRef.2980944259779963.9600430592557602", "name": "python-dotenv", "type": "library", "version": "1.2.3"}, {"bom-ref": "BomRef.07784014533618899.9029740332814337", "name": "qrcode", "type": "library", "version": "7.4.2"}, {"bom-ref": "BomRef.89540646324045.8344889130023655", "name": "requests", "type": "library", "version": "2.34.2"}, {"bom-ref": "BomRef.050463503871550186.7954216735035412", "name": "typing_extensions", "type": "library", "version": "4.16.0"}, {"bom-ref": "BomRef.942080058585724.5403614944696896", "name": "urllib3", "type": "library", "version": "2.8.0"}, {"bom-ref": "BomRef.27736999659690553.8260508632873442", "name": "wrapt", "type": "library", "version": "2.4.1"}], "dependencies": [{"ref": "BomRef.050463503871550186.7954216735035412"}, {"ref": "BomRef.050879670100266616.3887937969278562"}, {"ref": "BomRef.06692414663803226.7653130692504316"}, {"ref": "BomRef.07784014533618899.9029740332814337"}, {"ref": "BomRef.09483812231142208.2569990275669606"}, {"ref": "BomRef.14707778158064222.6125711939481899"}, {"ref": "BomRef.1507710281742789.6110313805863352"}, {"ref": "BomRef.21287401879514434.10368524824562075"}, {"ref": "BomRef.24339875774241837.45172563835933144"}, {"ref": "BomRef.2585005456317706.4230208136482163"}, {"ref": "BomRef.2730896641550694.020938101221575023"}, {"ref": "BomRef.27736999659690553.8260508632873442"}, {"ref": "BomRef.2980944259779963.9600430592557602"}, {"ref": "BomRef.3810327916749888.06474820129219083"}, {"ref": "BomRef.47649476119376466.3340449618443627"}, {"ref": "BomRef.48659619758192785.5992626631369692"}, {"ref": "BomRef.5585491217192199.5126117681606366"}, {"ref": "BomRef.5630687667671888.19324434564941206"}, {"ref": "BomRef.5716932027988575.7399962998987576"}, {"ref": "BomRef.6675096428536283.8794391469173217"}, {"ref": "BomRef.7352481613447417.9984634747006796"}, {"ref": "BomRef.7353067276939234.614341620950565"}, {"ref": "BomRef.7458891831264738.9177405973722382"}, {"ref": "BomRef.7676286867262253.797193314543251"}, {"ref": "BomRef.8034323974625658.04911780588796055"}, {"ref": "BomRef.850168987435196.919024087205839"}, {"ref": "BomRef.8666617199891004.9268999121637416"}, {"ref": "BomRef.8672708059728946.4463997762243702"}, {"ref": "BomRef.89540646324045.8344889130023655"}, {"ref": "BomRef.942080058585724.5403614944696896"}, {"ref": "BomRef.9771255932776772.2755625632795293"}, {"ref": "BomRef.9975654885021725.38805174228818506"}], "metadata": {"timestamp": "2026-09-20T12:51:26.441080+00:00"}, "serialNumber": "urn:uuid:0a815f61-2e37-4f44-bf33-b537e0ec0a18", "version": 1, "$schema": "http://cyclonedx.org/schema/bom-1.4.schema.json", "bomFormat": "CycloneDX", "specVersion": "1.4"}
+{
+  "components": [
+    {
+      "bom-ref": "BomRef.2585005456317706.4230208136482163",
+      "name": "Authlib",
+      "type": "library",
+      "version": "1.8.0"
+    },
+    {
+      "bom-ref": "BomRef.8672708059728946.4463997762243702",
+      "name": "Deprecated",
+      "type": "library",
+      "version": "1.3.1"
+    },
+    {
+      "bom-ref": "BomRef.1507710281742789.6110313805863352",
+      "name": "Flask",
+      "type": "library",
+      "version": "3.1.3"
+    },
+    {
+      "bom-ref": "BomRef.9771255932776772.2755625632795293",
+      "name": "Flask-Limiter",
+      "type": "library",
+      "version": "4.1.1"
+    },
+    {
+      "bom-ref": "BomRef.050879670100266616.3887937969278562",
+      "name": "Jinja2",
+      "type": "library",
+      "version": "3.1.6"
+    },
+    {
+      "bom-ref": "BomRef.850168987435196.919024087205839",
+      "name": "MarkupSafe",
+      "type": "library",
+      "version": "3.0.3"
+    },
+    {
+      "bom-ref": "BomRef.24339875774241837.45172563835933144",
+      "name": "PyJWT",
+      "type": "library",
+      "version": "2.14.0"
+    },
+    {
+      "bom-ref": "BomRef.47649476119376466.3340449618443627",
+      "name": "PyOTP",
+      "type": "library",
+      "version": "2.10.0"
+    },
+    {
+      "bom-ref": "BomRef.7676286867262253.797193314543251",
+      "name": "Werkzeug",
+      "type": "library",
+      "version": "3.1.8"
+    },
+    {
+      "bom-ref": "BomRef.48659619758192785.5992626631369692",
+      "name": "blinker",
+      "type": "library",
+      "version": "1.9.0"
+    },
+    {
+      "bom-ref": "BomRef.14707778158064222.6125711939481899",
+      "name": "certifi",
+      "type": "library",
+      "version": "2026.7.22"
+    },
+    {
+      "bom-ref": "BomRef.7458891831264738.9177405973722382",
+      "name": "cffi",
+      "type": "library",
+      "version": "2.1.1"
+    },
+    {
+      "bom-ref": "BomRef.06692414663803226.7653130692504316",
+      "name": "charset-normalizer",
+      "type": "library",
+      "version": "3.5.1"
+    },
+    {
+      "bom-ref": "BomRef.8034323974625658.04911780588796055",
+      "name": "click",
+      "type": "library",
+      "version": "8.5.0"
+    },
+    {
+      "bom-ref": "BomRef.9975654885021725.38805174228818506",
+      "name": "cryptography",
+      "type": "library",
+      "version": "50.0.1"
+    },
+    {
+      "bom-ref": "BomRef.2730896641550694.020938101221575023",
+      "name": "google-auth",
+      "type": "library",
+      "version": "2.58.0"
+    },
+    {
+      "bom-ref": "BomRef.5585491217192199.5126117681606366",
+      "name": "idna",
+      "type": "library",
+      "version": "3.20"
+    },
+    {
+      "bom-ref": "BomRef.8666617199891004.9268999121637416",
+      "name": "itsdangerous",
+      "type": "library",
+      "version": "2.2.0"
+    },
+    {
+      "bom-ref": "BomRef.7353067276939234.614341620950565",
+      "name": "joserfc",
+      "type": "library",
+      "version": "1.7.5"
+    },
+    {
+      "bom-ref": "BomRef.5716932027988575.7399962998987576",
+      "name": "limits",
+      "type": "library",
+      "version": "5.8.0"
+    },
+    {
+      "bom-ref": "BomRef.6675096428536283.8794391469173217",
+      "name": "ordered-set",
+      "type": "library",
+      "version": "4.1.0"
+    },
+    {
+      "bom-ref": "BomRef.21287401879514434.10368524824562075",
+      "name": "pillow",
+      "type": "library",
+      "version": "12.3.0"
+    },
+    {
+      "bom-ref": "BomRef.3810327916749888.06474820129219083",
+      "name": "pyasn1",
+      "type": "library",
+      "version": "0.6.4"
+    },
+    {
+      "bom-ref": "BomRef.5630687667671888.19324434564941206",
+      "name": "pyasn1_modules",
+      "type": "library",
+      "version": "0.4.2"
+    },
+    {
+      "bom-ref": "BomRef.7352481613447417.9984634747006796",
+      "name": "pycparser",
+      "type": "library",
+      "version": "3.0"
+    },
+    {
+      "bom-ref": "BomRef.09483812231142208.2569990275669606",
+      "name": "pypng",
+      "type": "library",
+      "version": "0.20220715.0"
+    },
+    {
+      "bom-ref": "BomRef.2980944259779963.9600430592557602",
+      "name": "python-dotenv",
+      "type": "library",
+      "version": "1.2.3"
+    },
+    {
+      "bom-ref": "BomRef.07784014533618899.9029740332814337",
+      "name": "qrcode",
+      "type": "library",
+      "version": "7.4.2"
+    },
+    {
+      "bom-ref": "BomRef.89540646324045.8344889130023655",
+      "name": "requests",
+      "type": "library",
+      "version": "2.34.2"
+    },
+    {
+      "bom-ref": "BomRef.050463503871550186.7954216735035412",
+      "name": "typing_extensions",
+      "type": "library",
+      "version": "4.16.0"
+    },
+    {
+      "bom-ref": "BomRef.942080058585724.5403614944696896",
+      "name": "urllib3",
+      "type": "library",
+      "version": "2.8.0"
+    },
+    {
+      "bom-ref": "BomRef.27736999659690553.8260508632873442",
+      "name": "wrapt",
+      "type": "library",
+      "version": "2.4.1"
+    }
+  ],
+  "dependencies": [
+    { "ref": "BomRef.050463503871550186.7954216735035412" },
+    { "ref": "BomRef.050879670100266616.3887937969278562" },
+    { "ref": "BomRef.06692414663803226.7653130692504316" },
+    { "ref": "BomRef.07784014533618899.9029740332814337" },
+    { "ref": "BomRef.09483812231142208.2569990275669606" },
+    { "ref": "BomRef.14707778158064222.6125711939481899" },
+    { "ref": "BomRef.1507710281742789.6110313805863352" },
+    { "ref": "BomRef.21287401879514434.10368524824562075" },
+    { "ref": "BomRef.24339875774241837.45172563835933144" },
+    { "ref": "BomRef.2585005456317706.4230208136482163" },
+    { "ref": "BomRef.2730896641550694.020938101221575023" },
+    { "ref": "BomRef.27736999659690553.8260508632873442" },
+    { "ref": "BomRef.2980944259779963.9600430592557602" },
+    { "ref": "BomRef.3810327916749888.06474820129219083" },
+    { "ref": "BomRef.47649476119376466.3340449618443627" },
+    { "ref": "BomRef.48659619758192785.5992626631369692" },
+    { "ref": "BomRef.5585491217192199.5126117681606366" },
+    { "ref": "BomRef.5630687667671888.19324434564941206" },
+    { "ref": "BomRef.5716932027988575.7399962998987576" },
+    { "ref": "BomRef.6675096428536283.8794391469173217" },
+    { "ref": "BomRef.7352481613447417.9984634747006796" },
+    { "ref": "BomRef.7353067276939234.614341620950565" },
+    { "ref": "BomRef.7458891831264738.9177405973722382" },
+    { "ref": "BomRef.7676286867262253.797193314543251" },
+    { "ref": "BomRef.8034323974625658.04911780588796055" },
+    { "ref": "BomRef.850168987435196.919024087205839" },
+    { "ref": "BomRef.8666617199891004.9268999121637416" },
+    { "ref": "BomRef.8672708059728946.4463997762243702" },
+    { "ref": "BomRef.89540646324045.8344889130023655" },
+    { "ref": "BomRef.942080058585724.5403614944696896" },
+    { "ref": "BomRef.9771255932776772.2755625632795293" },
+    { "ref": "BomRef.9975654885021725.38805174228818506" }
+  ],
+  "metadata": { "timestamp": "2026-09-20T12:51:26.441080+00:00" },
+  "serialNumber": "urn:uuid:0a815f61-2e37-4f44-bf33-b537e0ec0a18",
+  "version": 1,
+  "$schema": "http://cyclonedx.org/schema/bom-1.4.schema.json",
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4"
+}

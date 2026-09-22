@@ -20,9 +20,14 @@ LAB_HTTPS = os.environ.get("LAB_HTTPS") == "1"
 
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
 GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
-# Separate OAuth client registered as an Android/native client (no client secret --
-# native apps use PKCE instead). Kept distinct from the web client id so a stolen
-# mobile id_token audience can never be replayed against the web flow or vice versa.
+# The mobile app authenticates via Credential Manager (see
+# mobile/.../GoogleAuthConfig.kt), whose setServerClientId() requires a
+# WEB-type OAuth client id -- there is no separate "Android client"/SHA-1
+# flow involved (Google deprecated custom-scheme OAuth redirects on Android,
+# which is what an Android-type client would otherwise be for). This can be
+# the same value as GOOGLE_CLIENT_ID, or a second, separate Web client if you
+# want mobile-issued and web-issued id_tokens to be mutually non-replayable
+# across flows (a token minted for one audience is rejected by the other).
 GOOGLE_CLIENT_ID_MOBILE = os.environ.get("GOOGLE_CLIENT_ID_MOBILE", "")
 
 ADMIN_EMAILS = {

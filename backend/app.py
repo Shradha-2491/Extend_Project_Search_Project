@@ -309,6 +309,8 @@ def ratelimit_handler(e):
     from flask_limiter.util import get_remote_address
     db.log_event("rate_limited", path=request.path, ip=get_remote_address(),
                   username=session.get("username"), limit=str(e.description))
+    if request.path.startswith("/api/"):
+        return {"error": "rate_limited"}, 429
     return templates.render_page(
         "<h1>Too Many Requests</h1><div class=\"err\">You've made too many requests "
         "in a short time. Please wait and try again.</div>",

@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.cyclonedx.bom)
 }
 
 android {
@@ -18,10 +19,6 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        // AppAuth needs a redirect scheme for the OAuth callback; keep this
-        // in sync with GoogleAuthConfig.REDIRECT_URI.
-        manifestPlaceholders["appAuthRedirectScheme"] = "com.example.product_search_project"
     }
 
     buildTypes {
@@ -31,17 +28,30 @@ android {
             // network_security_config.xml. This block, and cleartext access,
             // are switched off entirely in the release build below.
             buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:5001/\"")
-            buildConfigField("String", "GOOGLE_CLIENT_ID_MOBILE", "\"\"")
+            // Credential Manager's setServerClientId() needs the WEB client id
+            // (its aud claim is what the backend verifies against) -- not an
+            // Android-type client id. Same value as backend's GOOGLE_CLIENT_ID_MOBILE.
+            buildConfigField("String", "GOOGLE_CLIENT_ID_MOBILE", "\"822229929166-0up1j5kfbbd9c2p7slefr6kp5407eotv.apps.googleusercontent.com\"")
             isDebuggable = true
         }
         release {
             // Assignment objective: the release APK must not be debuggable,
-            // must be minified/shrunk, and must not embed secrets -- the API
-            // base URL is the only build-time config baked in, and there is
-            // no client secret to embed (the mobile OAuth client is
-            // public/PKCE-based, see GoogleAuthConfig).
-            buildConfigField("String", "API_BASE_URL", "\"https://YOUR-CLASSROOM-HOST:5001/\"")
-            buildConfigField("String", "GOOGLE_CLIENT_ID_MOBILE", "\"\"")
+            // must be minified/shrunk, and must not embed secrets. There is
+            // no client secret to embed either way -- Credential Manager's
+            // flow (see GoogleAuthConfig) has no client-secret concept, the
+            // same way PKCE removes it for authorization-code flows; the
+            // GOOGLE_CLIENT_ID_MOBILE value below is a public identifier,
+            // not a secret (same value as the debug build's, and as
+            // backend's GOOGLE_CLIENT_ID_MOBILE).
+            //
+            // No real classroom host was provided for this assignment, so
+            // this points at a synthetic local HTTPS host instead (backend/
+            // run_https.py + backend/certs/, self-signed, gitignored) --
+            // see network_security_config.xml's release variant for the
+            // certificate-pinning half of this. Swap this URL (and that
+            // file's domain/pins) if you later get a real host.
+            buildConfigField("String", "API_BASE_URL", "\"https://10.0.2.2:5443/\"")
+            buildConfigField("String", "GOOGLE_CLIENT_ID_MOBILE", "\"822229929166-0up1j5kfbbd9c2p7slefr6kp5407eotv.apps.googleusercontent.com\"")
             isDebuggable = false
             optimization {
                 enable = true
@@ -79,14 +89,18 @@ dependencies {
     implementation(libs.retrofit.kotlinx.serialization.converter)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.okhttp)
-    debugImplementation(libs.okhttp.logging.interceptor)
+    implementation(libs.okhttp.logging.interceptor)
 
     // Encrypted local storage for access/refresh tokens (never plain
     // SharedPreferences) -- see data/TokenStore.kt.
     implementation(libs.androidx.security.crypto)
 
-    // Google Sign-In via Authorization Code + PKCE, no client secret on device.
-    implementation(libs.appauth)
+    // Google Sign-In via Credential Manager (Google's current recommended
+    // native flow -- validates the app via package name + SHA-1 fingerprint,
+    // no OAuth redirect URI involved; see GoogleAuthConfig).
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
 
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))

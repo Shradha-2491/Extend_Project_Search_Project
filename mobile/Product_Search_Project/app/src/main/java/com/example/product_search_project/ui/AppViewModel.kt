@@ -109,8 +109,18 @@ class AppViewModel : ViewModel() {
     }
 
     fun requestPasswordReset(identifier: String) = launchGuarded {
-        authRepo.requestPasswordReset(identifier)
-        errorMessage = "If an account exists, reset instructions were sent."
+        when (val result = authRepo.requestPasswordReset(identifier)) {
+            is ApiResult.Ok -> errorMessage = "If an account exists, reset instructions were sent."
+            is ApiResult.Failure -> errorMessage = if (result.code == 429)
+                "Too many requests. Please wait and try again." else result.error
+        }
+    }
+
+    fun confirmPasswordReset(token: String, newPassword: String) = launchGuarded {
+        when (val result = authRepo.confirmPasswordReset(token, newPassword)) {
+            is ApiResult.Ok -> errorMessage = "Password updated. You can log in now."
+            is ApiResult.Failure -> errorMessage = result.error
+        }
     }
 
     fun logout() = launchGuarded {
@@ -168,7 +178,7 @@ class AppViewModel : ViewModel() {
                 block()
             } catch (e: Exception) {
                 e.printStackTrace()
-                errorMessage = "${e.javaClass.simpleName}: ${e.message}"
+                errorMessage = "Something went wrong. Please try again."
             } finally {
                 loading = false
             }

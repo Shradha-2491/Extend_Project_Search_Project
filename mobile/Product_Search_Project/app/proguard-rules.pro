@@ -19,5 +19,9 @@
 -dontwarn retrofit2.**
 -keepattributes Signature, Exceptions
 
-# AppAuth
--keep class net.openid.appauth.** { *; }
+# Credential Manager / Google ID (androidx.credentials, googleid) ship their
+# own consumer-proguard-rules bundled in their AARs, auto-merged by R8 --
+# no manual -keep needed here. (This file previously had a leftover -keep
+# for net.openid.appauth, a dependency removed when mobile Google Sign-In
+# was migrated to Credential Manager; harmless dead config, since a -keep
+# for an absent class is a no-op, but removed for accuracy.)

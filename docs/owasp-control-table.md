@@ -54,7 +54,7 @@ relative to `backend/` unless stated otherwise.
 
 | Control | Implementation | Component | Test Evidence |
 |---|---|---|---|
-| SBOM generation | `docs/sbom/backend-sbom.json` (real, tool-generated via `pip-audit --format=cyclonedx-json`); `docs/sbom/mobile-sbom.json` (hand-authored from the Gradle version catalog, regeneration command documented) | Backend, Mobile | files present in `docs/sbom/` |
+| SBOM generation | `docs/sbom/backend-sbom.json` (real, tool-generated via `pip-audit --format=cyclonedx-json`, 32 components); `docs/sbom/mobile-sbom.json` (real, tool-generated via the CycloneDX Gradle plugin, 282 components — the full resolved dependency graph) | Backend, Mobile | files present in `docs/sbom/` |
 | Dependency vulnerability scanning + remediation | `pip-audit` found 10 CVEs in `cryptography==43.0.3`; fixed by widening the version pin and upgrading | Backend | `docs/scans/pip_audit_after_fix.txt` |
 
 ## A07:2021 — Identification and Authentication Failures
@@ -97,7 +97,7 @@ omitted, per the assignment's requirement to cover the OWASP list.
 
 | Control | Implementation | Test Evidence |
 |---|---|---|
-| No hardcoded secrets in the release APK | No Google client secret exists for the mobile OAuth client (PKCE, public client); API base URL is the only baked-in config | `docs/mobile-security-checklist.md` §2 |
-| Insecure local storage prevention | `TokenStore` (EncryptedSharedPreferences) instead of plain `SharedPreferences`; `allowBackup="false"` | `docs/mobile-security-checklist.md` §3 |
-| TLS enforcement + certificate pinning | Per-build-type `network_security_config.xml` — debug allows only 10.0.2.2 cleartext, release forbids all cleartext and pins the server's SPKI hash | `docs/mobile-security-checklist.md` §4 |
-| Release build hardening (no debug flags) | `isDebuggable=false`, R8 minify/shrink on, ProGuard rules kept minimal/specific | `docs/mobile-security-checklist.md` §2 |
+| No hardcoded secrets in the release APK | No Google client secret exists for the mobile OAuth client (Credential Manager has no client-secret concept, the same way PKCE removes it for authorization-code flows); API base URL is the only baked-in config | `docs/scans/mobile/apk_secret_scan.txt` |
+| Insecure local storage prevention | `TokenStore` (EncryptedSharedPreferences) instead of plain `SharedPreferences`; `allowBackup="false"` | `docs/scans/mobile/local_storage_check.txt` |
+| TLS enforcement + certificate pinning | Per-build-type `network_security_config.xml` — debug allows only 10.0.2.2 cleartext, release forbids all cleartext and pins the server's SPKI hash | `docs/scans/mobile/mitm_pinning_test.txt` (includes a substituted-certificate rejection test against the real release build) |
+| Release build hardening (no debug flags) | `isDebuggable=false`, R8 minify/shrink on, ProGuard rules kept minimal/specific | `docs/scans/mobile/apk_debuggable_check.txt` (also confirms R8 renamed the app's own classes) |

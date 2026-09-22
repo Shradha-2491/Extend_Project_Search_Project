@@ -1,29 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   RELEASE build. No cleartext traffic anywhere, and certificate pinning on
-  the classroom API host. Replace YOUR-CLASSROOM-HOST and the two pins below
-  with your real server before building/signing -- generate a pin with:
+  the API host.
 
-    openssl s_client -connect YOUR-CLASSROOM-HOST:5001 -servername YOUR-CLASSROOM-HOST \
+  There is no real "classroom host" provided for this assignment, so per
+  Rule 3 (synthetic test data only) this pins to a locally-generated,
+  throwaway self-signed certificate standing in for one; see
+  backend/run_https.py and backend/certs/ (gitignored; regenerate with the
+  openssl command in run_https.py's docstring). The active certificate is
+  bundled at res/raw/lab_test_ca.pem as this domain's trust anchor, since a
+  self-signed cert is not in the public trust store the way a real CA-issued
+  classroom-host cert would be.
+
+  To point this at a real host instead: replace the <domain> value, drop the
+  raw-resource trust anchor back to src="system", and regenerate both pins
+  with:
+
+    openssl s_client -connect YOUR-HOST:PORT -servername YOUR-HOST \
       </dev/null 2>/dev/null | openssl x509 -pubkey -noout \
       | openssl pkey -pubin -outform der \
       | openssl dgst -sha256 -binary | openssl enc -base64
 
-  Always configure a SECOND (backup) pin from a not-yet-deployed key/cert so
-  you can rotate the certificate without bricking already-installed apps.
+  The second pin here (server-next.crt) is a not-yet-deployed backup key/cert,
+  present in the pin-set so the certificate can be rotated later without
+  bricking already-installed apps, but not currently served by anything.
   This is exactly what the assignment's MITM-proxy demonstration should show
-  failing closed: a proxy's substituted certificate does not match either
-  pin, so the TLS handshake is rejected and no request data reaches it.
+  failing closed: a proxy's substituted certificate matches neither pin, so
+  the TLS handshake is rejected and no request data reaches it.
 -->
 <network-security-config>
     <domain-config cleartextTrafficPermitted="false">
-        <domain includeSubdomains="true">YOUR-CLASSROOM-HOST</domain>
-        <pin-set expiration="2027-12-31">
-            <pin digest="SHA-256">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</pin>
-            <pin digest="SHA-256">BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=</pin>
+        <domain includeSubdomains="false">10.0.2.2</domain>
+        <pin-set expiration="2036-09-22">
+            <pin digest="SHA-256">dyRO3uwd+87T29MEsuerOFc39aYriCQbYwExVU+kMI0=</pin>
+            <pin digest="SHA-256">iTjertkoX326Ii7+wOyEWxjtHLCKUHJQg4ZkSq3qHOQ=</pin>
         </pin-set>
         <trust-anchors>
-            <certificates src="system" />
+            <certificates src="@raw/lab_test_ca" />
         </trust-anchors>
     </domain-config>
     <base-config cleartextTrafficPermitted="false">

@@ -1,0 +1,45 @@
+Release APK debuggable / backup flag check
+============================================
+Date: 2026-09-22
+APK: mobile/Product_Search_Project/app-release-signed.apk
+Tool: <Android SDK>/build-tools/36.0.0/aapt
+
+Command                                                  Result
+--------------------------------------------------------------
+aapt dump badging app-release-signed.apk                (no output for
+  | grep -i "application-debuggable"                     "application-debuggable")
+
+aapt dump xmltree app-release-signed.apk AndroidManifest.xml
+  | grep -i allowBackup                                  android:allowBackup=0x0
+
+What this means
+----------------
+- No "application-debuggable" line means the release manifest does NOT set
+  android:debuggable="true" -- matches app/build.gradle.kts's release
+  block (isDebuggable = false). A debuggable release build would let anyone
+  attach a debugger / read process memory on a non-rooted device; this APK
+  does not have that exposure.
+- allowBackup=0x0 (false) confirms Android's auto-backup/adb backup cannot
+  export this app's private storage (which holds the EncryptedSharedPreferences
+  file backing TokenStore) to a PC or the user's Google account. This closes
+  off a way the encrypted-at-rest tokens' storage location could otherwise
+  be exfiltrated, independent of the encryption itself -- see
+  local_storage_check.txt for the encryption evidence.
+
+Bonus: R8 minification check
+-----------------------------
+grep for this project's own class names inside classes.dex:
+
+  strings classes.dex | grep -c "ProductRepository\|AppViewModel\|GoogleAuthConfig"
+  -> 0 matches
+
+  strings classes.dex | grep "MainActivity"
+  -> 1Lcom/example/product_search_project/MainActivity;   (only manifest-declared
+                                                             activities survive
+                                                             renaming)
+
+This confirms optimization { enable = true } in the release build type is
+actually shrinking/renaming classes, not just declared and unused --
+someone reverse-engineering this APK does not get readable class/method
+names for the app's own logic (only for the one Activity Android's manifest
+system requires to keep its real name).

@@ -7,6 +7,8 @@ import hashlib
 import secrets
 from datetime import datetime, timedelta, timezone
 
+from flask import url_for
+
 import config
 import db
 import mail
@@ -204,11 +206,13 @@ def request_password_reset(identifier: str):
             (token_hash, expires, row["id"]),
         )
         con.commit()
+        reset_url = url_for("web.password_reset_confirm", token=token, _external=True)
         mail.send_mail(
             row["email"] or row["username"],
             "Password reset",
-            f"Reset token (valid 15 minutes): {token}\n"
-            "Submit this with your new password at /password-reset/confirm.",
+            f"Reset your password (valid 15 minutes): {reset_url}\n\n"
+            f"If the link doesn't open, go to {url_for('web.password_reset_confirm', _external=True)} "
+            f"and enter this token manually: {token}",
         )
         db.log_event("password_reset_requested", username=row["username"])
     con.close()

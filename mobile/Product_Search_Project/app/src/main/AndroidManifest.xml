@@ -35,20 +35,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <!-- AppAuth redirects here after the Google Sign-In Custom Tab
-             completes; the scheme matches manifestPlaceholders.appAuthRedirectScheme
-             in app/build.gradle.kts. -->
-        <activity
-            android:name="net.openid.appauth.RedirectUriReceiverActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="${appAuthRedirectScheme}" android:host="oauth2redirect" />
-            </intent-filter>
-        </activity>
     </application>
 
 </manifest>

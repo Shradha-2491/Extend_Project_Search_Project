@@ -1,0 +1,95 @@
+MITM / certificate-pinning demonstration
+==========================================
+Date: 2026-09-22
+APK: mobile/Product_Search_Project/app-release-signed.apk (release, R8-minified,
+     non-debuggable -- see apk_debuggable_check.txt)
+
+No real classroom host was provided for this assignment. Per Rule 3
+(synthetic test data only), this uses a locally-generated, throwaway
+self-signed CA as the "hostile/untrusted network target that presents an
+unexpected certificate" stand-in for a real MITM proxy -- the security
+mechanism under test (Android's network_security_config trust-anchor +
+certificate-pinning enforcement, evaluated entirely on-device by Conscrypt/
+OkHttp) does not care whether the "wrong" certificate came from an actual
+mitmproxy process or a second self-signed cert; both are "a TLS server
+presenting a certificate the app did not expect," which is exactly the
+threat this control defends against.
+
+Setup
+-----
+- backend/certs/server.{crt,key}      -- primary cert, actively served
+- backend/certs/server-next.{crt,key} -- backup cert, pinned but not served
+                                          (rotation-without-bricking pin)
+- backend/certs/attacker.{crt,key}    -- third cert, NOT in the pin-set at
+                                          all -- stands in for a MITM proxy's
+                                          substituted leaf certificate
+- backend/run_https.py serves the app on :5443 with server.crt/key
+- mobile release network_security_config.xml pins on domain 10.0.2.2:
+    pin 1 (primary, server.crt):      dyRO3uwd+87T29MEsuerOFc39aYriCQbYwExVU+kMI0=
+    pin 2 (backup, server-next.crt):  iTjertkoX326Ii7+wOyEWxjtHLCKUHJQg4ZkSq3qHOQ=
+  trust-anchors: res/raw/lab_test_ca.pem (= server.crt; a self-signed cert
+  is not in the public trust store the way a real CA-issued cert would be,
+  so it has to be bundled explicitly as this domain's trust anchor)
+- attacker.crt's pin (for reference, confirms it matches neither pinned
+  value): XxgUuoofo5k5RkNYlkCFXhZLDUDPP2n8jMhUYaE1Qw4=
+
+Test 1 -- legitimate certificate (control)
+-------------------------------------------
+backend/run_https.py running (serves server.crt). Release app: log in as
+lalit/mohan.
+
+Result: reached "Set up MFA" screen with a freshly issued secret --
+i.e. login succeeded end to end over real TLS with pinning enforced and
+passing.
+
+Test 2 -- substituted certificate (the actual MITM simulation)
+------------------------------------------------------------------
+Swapped the same host:port (10.0.2.2:5443) to serve attacker.crt instead
+(same domain, same server code, only the certificate differs -- exactly
+what a MITM proxy transparently intercepting the connection would do).
+Release app: log in as lalit/mohan again, same credentials, no app changes.
+
+Result: request never reached the server. Logcat:
+
+  javax.net.ssl.SSLHandshakeException: java.security.cert.CertPathValidatorException:
+  Trust anchor for certification path not found.
+    at com.android.org.conscrypt.SSLUtils.toSSLHandshakeException(...)
+    at com.android.org.conscrypt.ConscryptEngine.convertException(...)
+    ...
+    at yk1.g(r8-map-id-606711881ba0ae9181ff451f344ea5cb3847457074cfdeea070746a30368b1aa:88)
+    at zk1.b(...) ... du.a(...) ...
+
+The obfuscated frame names (yk1, zk1, du, r70 -- not OkHttp/Retrofit/
+ApiClient) additionally confirm this failure was observed against the real
+R8-minified release build, not an unminified debug build.
+
+No credentials, no session token, and no application data were sent --
+the TLS handshake itself failed before any HTTP request was transmitted.
+This is exactly the "fails closed" behavior the assignment's MITM
+objective is checking for: a network in the position to intercept traffic
+learns nothing, because the client refuses to complete a handshake with
+anything other than a pinned key.
+
+Test 3 -- legitimate certificate restored (confirms it's not just broken)
+-----------------------------------------------------------------------------
+Swapped back to server.crt with no other change. Release app: same login,
+same credentials, no reinstall.
+
+Result: reached "Set up MFA" again with a fresh secret -- confirms Test 2's
+failure was specifically the substituted-certificate rejection, not a
+general app malfunction; the exact same binary works the instant the
+correct certificate is back.
+
+What this demonstrates
+-----------------------
+- TLS enforcement: cleartextTrafficPermitted="false" in both the domain and
+  base config means there is no fallback to plaintext if TLS fails -- the
+  request simply fails.
+- Certificate handling: a self-signed/unknown certificate is rejected at
+  the trust-anchor level even before pin comparison would run, because only
+  the one bundled certificate is trusted for this domain in the release
+  build (contrast with the debug build, which never has this file at all
+  and only allows cleartext to 10.0.2.2 for local development).
+- No sensitive data leaked in transit under substitution: since the
+  handshake itself fails, no username, password, token, or price data is
+  ever placed on the wire toward the substituted endpoint.
