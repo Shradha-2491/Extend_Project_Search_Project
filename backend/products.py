@@ -2,7 +2,7 @@
 (`GET /api/v1/products` and friends). Having exactly one function decide
 which rows and which columns a role may see is what makes role-scoped search
 a single reusable control instead of two independently-maintained copies
-that could drift apart -- see docs/owasp-control-table.md, OWASP A01."""
+that could drift apart -- see docs/doc-pdf/owasp-control-table.pdf, OWASP A01."""
 from datetime import datetime, timezone
 
 import db

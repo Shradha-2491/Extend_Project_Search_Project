@@ -48,8 +48,9 @@ class AuthRepository(private val api: ApiService, private val tokens: TokenStore
         return fail(resp.code(), resp.errorBody()?.string())
     }
 
-    suspend fun requestPasswordReset(identifier: String) {
-        runCatching { api.passwordResetRequest(PasswordResetRequest(identifier)) }
+    suspend fun requestPasswordReset(identifier: String): ApiResult<Unit> {
+        val resp = api.passwordResetRequest(PasswordResetRequest(identifier))
+        return if (resp.isSuccessful) ApiResult.Ok(Unit) else fail(resp.code(), resp.errorBody()?.string())
     }
 
     suspend fun confirmPasswordReset(token: String, newPassword: String): ApiResult<Unit> {

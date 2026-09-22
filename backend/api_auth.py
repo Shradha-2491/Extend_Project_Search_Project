@@ -51,11 +51,11 @@ def login():
 @bp.post("/google/mobile")
 @limiter.limit("15 per minute")
 def google_mobile():
-    """Mobile Google Sign-In: the app does the Authorization Code + PKCE
-    dance with Google itself (via AppAuth/Custom Tabs) and hands us only the
-    resulting id_token. We independently verify it against Google's public
-    keys before trusting anything in it -- see
-    security.verify_google_id_token_mobile / validate_google_userinfo."""
+    """Mobile Google Sign-In: the app authenticates with Google itself via
+    Credential Manager and hands us only the resulting id_token. We
+    independently verify it against Google's public keys before trusting
+    anything in it -- see security.verify_google_id_token_mobile /
+    validate_google_userinfo."""
     data = request.get_json(silent=True) or {}
     id_token = data.get("id_token", "")
     try:

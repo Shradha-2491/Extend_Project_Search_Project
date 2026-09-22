@@ -222,9 +222,14 @@ MFA_VERIFY_BODY = """
 {% if error %}<div class="err">{{ error }}</div>{% endif %}
 """
 
-# nosec B105 -- Bandit's variable-name heuristic flags PASSWORD_RESET_*_BODY
-# below as a "hardcoded password" because of the name; it's HTML template
-# text, not a credential.
+# Bandit flags PASSWORD_RESET_*_BODY below as a "hardcoded password"
+# because of the variable name; it's HTML template text, not a credential.
+# (A `# nosec` marker can't be placed inline here: Bandit matches it against
+# the exact flagged line, which is the `"""` opening a multi-line string --
+# anything after `#` on that same line becomes literal string content, not
+# a comment, corrupting the rendered page. Documented here and in
+# docs/scans/README.md instead; see the bandit report for the accepted
+# false-positive explanation.)
 PASSWORD_RESET_REQUEST_BODY = """
 <h1>Forgot password</h1>
 <form method="post">
@@ -238,7 +243,7 @@ PASSWORD_RESET_REQUEST_BODY = """
 {% endif %}
 """
 
-# nosec B105 -- same false positive as PASSWORD_RESET_REQUEST_BODY above.
+# Same false positive as PASSWORD_RESET_REQUEST_BODY above.
 PASSWORD_RESET_CONFIRM_BODY = """
 <h1>Reset password</h1>
 <form method="post">

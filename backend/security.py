@@ -1,12 +1,13 @@
 """Centralized, reusable security controls shared by the web routes, the JSON
 REST API, and (indirectly, via the API) the mobile app. Every RBAC check,
 token operation, and piece of crypto in this project goes through here so
-there is exactly one place to audit or fix -- see docs/owasp-control-table.md
+there is exactly one place to audit or fix -- see docs/doc-pdf/owasp-control-table.pdf
 for the mapping of each control below to the OWASP risks it addresses.
 """
 import base64
 import hashlib
 import json
+import logging
 import secrets
 import time
 from datetime import datetime, timedelta, timezone
@@ -299,7 +300,8 @@ def verify_google_id_token_mobile(id_token: str) -> dict:
             id_token, google_requests.Request(), config.GOOGLE_CLIENT_ID_MOBILE
         )
     except ValueError as e:
-        raise GoogleIdentityError(f"invalid_id_token: {e}")
+        logging.warning("mobile google id_token rejected: %s", e)
+        raise GoogleIdentityError("invalid_id_token")
     if claims.get("iss") not in ("accounts.google.com", "https://accounts.google.com"):
         raise GoogleIdentityError("invalid_issuer")
     return claims

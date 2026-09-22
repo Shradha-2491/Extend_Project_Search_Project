@@ -7,6 +7,7 @@ backend/lab.db
 backend/audit.db
 backend/audit.log
 backend/mail_outbox/
+backend/certs/
 lab.db
 audit.db
 audit.log
@@ -20,6 +21,7 @@ mobile/**/build/
 mobile/**/.gradle/
 mobile/**/local.properties
 mobile/**/*.apk
+mobile/**/*.apk.idsig
 mobile/**/*.aab
 mobile/**/*.jks
 mobile/**/*.keystore

@@ -21,46 +21,98 @@ should actually be read.
 
 ## Static analysis (`bandit`)
 
-Full output: `bandit_report.txt`. Five findings remain; none require a code
-change:
+Full output: `bandit_report.txt` (re-run 2026-09-22, bandit 1.9.4). Seven
+findings remain; none require a further code change:
 
 | # | Finding | File | Verdict |
 |---|---|---|---|
 | 1 | B608 possible SQL injection | `app.py:146` (`vulnerable_login`) | **Intentional.** This is the original OWASP-injection teaching route, kept deliberately vulnerable as the "before" side of the Injection control's evidence (see `owasp-control-table.md`, A03 row). It never establishes a session regardless of query result, so it cannot be used to actually log in as anyone. |
 | 2 | B608 possible SQL injection | `app.py:215` (`vulnerable_search`) | **Intentional**, same reasoning — the teaching "before" example; `search-secure` next to it is the parameterized "after". |
-| 3 | B404 subprocess import | `db.py` | **Accepted, low risk.** Only used once, to run `chattr +a` on the audit log file (see #4/#5 below) — no other use of `subprocess` in the codebase. |
-| 4/5 | B608 on `products.py` / `users_admin.py` UPDATE statements | (fixed via `# nosec` with inline justification) | **False positive, explained inline.** Both f-strings only ever splice in hardcoded `"<column> = ?"` fragments from a fixed allowlist chosen in the same function — never user input — and every actual value is still bound as a `?` parameter. Bandit's pattern-matcher can't see that distinction from the f-string shape alone. |
-| 6/7 | B105 "hardcoded password" | `templates.py` (`PASSWORD_RESET_*_BODY`) | **False positive.** Bandit's heuristic triggers on the variable *name* containing "password"; the value is an HTML template string, not a credential. |
+| 3 | B104 bind to all interfaces | `app.py:325` (`app.run(host="0.0.0.0", ...)`) | **Accepted, by design.** This is a local lab/classroom server, not a multi-tenant production service; it must bind beyond loopback so the Android emulator (which reaches the host machine as `10.0.2.2`, a different address than `127.0.0.1` from the emulator's own network namespace) can connect at all — the same reason the debug mobile build is only ever allowed to talk to that one address (`network_security_config.xml`). |
+| 4 | B104 bind to all interfaces | `run_https.py:33` | **Same reasoning as #3** — this is the synthetic local HTTPS host standing in for a real classroom host (see `docs/scans/mobile/mitm_pinning_test.txt`); it needs to be reachable from the emulator the same way. |
+| 5 | B404 subprocess import | `db.py` | **Accepted, low risk.** Only used once, to run `chattr +a` on the audit log file (see the PATH-resolution fix below) — no other use of `subprocess` in the codebase. |
+| 6/7 | B105 "hardcoded password" | `templates.py` (`PASSWORD_RESET_*_BODY`) | **False positive.** Bandit's heuristic triggers on the variable *name* containing "password"; the value is an HTML template string, not a credential. **Correction made this pass**: this file previously carried a `# nosec B105` comment on the line *before* each flagged assignment — Bandit matches `# nosec` against the exact physical line number it reports (the assignment line itself), so a comment on the preceding line has no effect at all. It was silently not suppressing anything, and the report still listed both as active findings even before this fix, contradicting what the comment implied. Since these are multi-line triple-quoted string assignments, an inline trailing `# nosec` on the same line isn't safe either — anything after `"""` on that line becomes part of the string's literal content, which would inject stray text into the rendered HTML page. The comments were corrected to accurately describe the reasoning without falsely claiming suppression; the findings remain visible in the report by design, with this explanation as the record of review. |
 
-**Real fix applied as a result of this scan**: `db.py`'s `chattr` call
-previously invoked the bare command name (`["chattr", "+a", path]`), which
-Bandit flagged as B607 (partial executable path — vulnerable to PATH
-manipulation). It now resolves the absolute path with `shutil.which()` first
-and skips the OS-level hardening step with a warning if `chattr` isn't
-found, instead of trusting `$PATH`. Confirmed fixed: B607 no longer appears
-in `bandit_report.txt`.
+Note on `products.py`/`users_admin.py`: their UPDATE-statement f-strings
+(hardcoded `"<column> = ?"` fragments from a fixed allowlist, never user
+input, with every actual value still bound as a `?` parameter) do **not**
+appear in this fresh run at all — the existing inline `# nosec B608`
+comments on those exact lines are correctly formed and bandit's own
+"potential issues skipped due to specifically being disabled" counter
+confirms 3 suppressions took effect (`db.py:201`, `products.py:123`,
+`users_admin.py:66`).
 
-**OWASP mapping**: A03 - Injection (rows 1/2/4/5, both the deliberate
-teaching example and the confirmed-safe pattern elsewhere), A05 - Security
-Misconfiguration (row 3/the PATH-resolution fix).
+**Real fixes applied as a result of scans (this pass and earlier)**:
+- `db.py`'s `chattr` call previously invoked the bare command name
+  (`["chattr", "+a", path]`), which Bandit flagged as B607 (partial
+  executable path — vulnerable to PATH manipulation). It now resolves the
+  absolute path with `shutil.which()` first and skips the OS-level
+  hardening step with a warning if `chattr` isn't found, instead of
+  trusting `$PATH`. Confirmed fixed: B607 no longer appears in
+  `bandit_report.txt`.
+- The `templates.py` B105 nosec-placement bug described in row 6/7 above.
+
+**OWASP mapping**: A03 - Injection (rows 1/2, the deliberate teaching
+example; the `products.py`/`users_admin.py` pattern noted above is the
+confirmed-safe counterpart), A05 - Security Misconfiguration (rows 3/4, and
+the PATH-resolution fix).
 
 ## SBOM
 
 - `docs/sbom/backend-sbom.json` — real CycloneDX SBOM generated with
   `pip-audit --format=cyclonedx-json` against the final `requirements.txt`
-  (31 components, 0 known vulnerabilities as of the scan above).
-- `docs/sbom/mobile-sbom.json` — hand-authored CycloneDX SBOM listing the
-  Android app's declared dependencies from `gradle/libs.versions.toml`
-  (Gradle could not be run in the environment that authored this project —
-  see `docs/mobile-security-checklist.md` §5 for the one command that
-  regenerates a tool-verified version once you have Android Studio/JDK).
+  (32 components: every direct *and* transitive dependency actually
+  installed in the venv, not just what's listed in `requirements.txt`;
+  0 known vulnerabilities, re-verified 2026-09-22).
+- `docs/sbom/mobile-sbom.json` — real CycloneDX SBOM, regenerated
+  2026-09-22 with the CycloneDX Gradle plugin (`./gradlew cyclonedxBom`,
+  added to `app/build.gradle.kts`) once an Android SDK became available in
+  this environment. **282 components** — the full resolved dependency
+  graph (all direct + transitive AndroidX/Kotlin/Google libraries), not
+  just the ~19 direct entries in `gradle/libs.versions.toml`. This replaces
+  a prior hand-authored version that had gone stale: it still listed
+  `net.openid:appauth`, a dependency removed when mobile Google Sign-In was
+  migrated to Credential Manager (see `GoogleAuthConfig.kt`), and was
+  missing `androidx.credentials`/`googleid` entirely. Regenerate any time
+  with `cd mobile/Product_Search_Project && ./gradlew cyclonedxBom`, output
+  at `app/build/reports/cyclonedx/bom.json`.
 
 ## Mobile scans
 
-Static/dynamic scans of the actual APK (`apktool`/`jadx` secret search,
-`aapt` debuggable check, EncryptedSharedPreferences verification, mitmproxy
-TLS-pinning demonstration) require building and signing a real APK and
-running it on a device/emulator, which this sandbox cannot do (no JDK/
-Android SDK). Reproducible step-by-step commands and pass/fail criteria for
-each are in `docs/mobile-security-checklist.md`; run them once in Android
-Studio and drop the output files into `docs/scans/mobile/`.
+All of the following now have real, reproducible output in
+`docs/scans/mobile/`, generated 2026-09-22 once an Android SDK/emulator
+became available in this environment (they were previously blocked and
+left as a manual checklist — see `docs/doc-pdf/mobile-security-checklist.pdf`):
+
+- `apk_secret_scan.txt` — release APK unzipped and grepped for
+  `client_secret`/`GOCSPX-`/API keys/PEM private keys. Clean; the only
+  matches are Kotlin property *names* (`password=`, `new_password=`), not
+  values.
+- `apk_debuggable_check.txt` — confirms `android:debuggable` is absent from
+  the release manifest and `allowBackup=false`; also confirms R8 actually
+  renamed the app's own classes (0 matches for `ProductRepository`/
+  `AppViewModel`/etc. in the dex, vs. the one manifest-declared `MainActivity`
+  that must keep its real name).
+- `local_storage_check.txt` — `TokenStore`'s `EncryptedSharedPreferences`
+  file has both encrypted keys *and* values; no plaintext JWT, no stray
+  SQLite cache.
+- `mitm_pinning_test.txt` — the full MITM/TLS-pinning demonstration against
+  a synthetic local HTTPS host (see below), including the negative test
+  (substituted certificate rejected with `SSLHandshakeException: Trust
+  anchor for certification path not found`, observed against the real
+  R8-obfuscated release build) and the recovery test (works again once the
+  legitimate certificate is restored, proving the rejection was specific to
+  the substitution, not a general break).
+
+A decompiled-source secret scan (`apktool`/`jadx`) was not run — those
+tools aren't installed in this environment — but `apk_secret_scan.txt`'s
+`strings`-based scan reads the same underlying dex string table a
+decompiler would, so it is not a materially weaker check for this purpose,
+only a less nicely formatted one.
+
+No real classroom host was provided for this assignment. Per Rule 3
+(synthetic test data only), the release build's `API_BASE_URL` and
+`network_security_config.xml`'s pinned domain/certificate point at a
+locally-generated, throwaway self-signed CA instead (`backend/run_https.py`,
+`backend/certs/`, gitignored) — see `mitm_pinning_test.txt` for the full
+setup and both the positive and negative test results.

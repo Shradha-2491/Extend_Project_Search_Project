@@ -1,0 +1,57 @@
+Secure local storage check
+===========================
+Date: 2026-09-22
+Device: emulator-5554 (AVD), app already logged in from earlier testing
+        (debug build at the time this check was run; the storage code
+        under test, TokenStore.kt, is identical in both variants, so this
+        evidence applies equally to release -- confirmed separately: the
+        release build was logged in successfully over the pinned synthetic
+        HTTPS host in mitm_pinning_test.txt, using the same TokenStore).
+
+Commands
+--------
+adb shell run-as com.example.product_search_project ls -la shared_prefs/ databases/
+  -> shared_prefs/secure_auth_prefs.xml (2352 bytes); no databases/ dir at all
+
+adb shell run-as com.example.product_search_project cat shared_prefs/secure_auth_prefs.xml
+  -> (see raw output below)
+
+Result (raw file contents)
+---------------------------
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<map>
+    <string name="AWgNlnVewyBc72MBTPFEGuceXIRTzx4itfl9gWGI7ECH">AX6x/6x5Rk8z...(truncated)</string>
+    <string name="__androidx_security_crypto_encrypted_prefs_key_keyset__">12a90152883e...</string>
+    <string name="__androidx_security_crypto_encrypted_prefs_value_keyset__">128801cedf54...</string>
+    <string name="AWgNlnUi5CVTFbHRwFjY7OqoTvivtL0Cqg==">AX6x/6z8ASQJkR2fx7pnGLTWQYZuzwMRH7h7c8+/8diK2zGZ/eN301oUyCS6Xjs=</string>
+    <string name="AWgNlnXt9De7g0YZFBtthVRqjrx3151h6N6pRuw=">AX6x/6zBxW/+tlo6V8qLKuxZd8lqj0StmY0W/dwp/8VurTZwtuCAhVz82RcXTQ==</string>
+    <string name="AWgNlnULUilMUNyeKzNR7FmfA4yTiHrdcknkSXVAwEKcFA==">AX6x/6xouJlM...(truncated)</string>
+</map>
+
+What this means
+----------------
+This is TokenStore.kt's EncryptedSharedPreferences (AndroidX Security
+Crypto), configured with AES256_SIV for key encryption and AES256_GCM for
+value encryption, with the master key held in the Android Keystore
+(hardware-backed on real devices) -- never written to disk itself.
+
+Two things confirm this is genuinely encrypted, not just base64-encoded
+plaintext:
+  1. Even the entry NAMES are ciphertext (e.g. "AWgNlnVewyBc72MB...") --
+     a plain SharedPreferences file would show readable keys like
+     "access_token" or "refresh_token". AES256_SIV deterministically
+     encrypts keys so the same logical key always maps to the same
+     ciphertext (needed so the app can still look values up by name),
+     without ever storing the plaintext key name.
+  2. The values are opaque AES-GCM ciphertext blocks -- no substring of
+     this file contains a readable JWT (no "eyJ..." header, which is what
+     a plaintext-stored access/refresh token would look like), a username,
+     or a role string.
+  3. No databases/ directory exists at all -- tokens are not additionally
+     cached in a SQLite database somewhere else in the app's private
+     storage.
+
+Combined with allowBackup="false" (see apk_debuggable_check.txt), this
+closes both halves of the local-storage risk: the data is encrypted at
+rest, AND the OS-level export path that could otherwise exfiltrate this
+file (adb backup / auto-backup to Google) is disabled entirely.

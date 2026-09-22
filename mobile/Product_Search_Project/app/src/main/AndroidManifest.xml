@@ -21,7 +21,7 @@
           Android Keystore and does NOT travel with a backup) to the user's
           Google account - disabling it removes that class of insecure
           local-storage exposure entirely rather than relying on encryption
-          alone. See docs/mobile-security-checklist.md.
+          alone. See docs/doc-pdf/mobile-security-checklist.pdf.
         -->
         <activity
             android:name=".MainActivity"
@@ -33,20 +33,6 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
-        <!-- AppAuth redirects here after the Google Sign-In Custom Tab
-             completes; the scheme matches manifestPlaceholders.appAuthRedirectScheme
-             in app/build.gradle.kts. -->
-        <activity
-            android:name="net.openid.appauth.RedirectUriReceiverActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="${appAuthRedirectScheme}" android:host="oauth2redirect" />
             </intent-filter>
         </activity>
     </application>

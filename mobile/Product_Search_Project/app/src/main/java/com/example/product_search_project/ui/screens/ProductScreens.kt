@@ -78,10 +78,9 @@ fun ProductDetailScreen(vm: AppViewModel, productId: Int) {
             Text("${product.name} (#${product.id})")
             Text("Current price: $${"%.2f".format(product.price)} -- version ${product.version}")
             Text(
-                "Updating sends the version you last saw plus a fresh, unique " +
-                    "Idempotency-Key (see ProductRepository.updatePrice), so a retry or double-tap " +
-                    "can't double-apply the change, and a concurrent edit elsewhere is rejected as a " +
-                    "409 conflict instead of silently overwritten.",
+                "Updating sends the version you last saw, so a retry or double-tap can't " +
+                    "double-apply the change, and a concurrent edit elsewhere is rejected instead " +
+                    "of silently overwritten.",
             )
             OutlinedTextField(newPrice, { newPrice = it }, label = { Text("New price") }, modifier = Modifier.fillMaxWidth())
             vm.errorMessage?.let { Text("Error: $it") }

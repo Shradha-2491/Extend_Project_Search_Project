@@ -1,7 +1,7 @@
 ============================= test session starts ==============================
-platform linux -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- /home/ubuntu/Downloads/Extended_Project_Search/backend/.venv/bin/python3
+platform linux -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- /home/shradha/Documents/SSE/Assignment_Product_Search/Extend_Project_Search_Project/backend/.venv/bin/python3
 cachedir: .pytest_cache
-rootdir: /home/ubuntu/Downloads/Extended_Project_Search/backend
+rootdir: /home/shradha/Documents/SSE/Assignment_Product_Search/Extend_Project_Search_Project/backend
 collecting ... collected 17 items
 
 tests/test_csrf_and_audit.py::test_web_post_without_csrf_token_is_rejected PASSED [  5%]
@@ -22,4 +22,4 @@ tests/test_rbac.py::test_vendor_cannot_edit_another_vendors_product PASSED [ 88%
 tests/test_rbac.py::test_no_bearer_token_is_unauthorized PASSED          [ 94%]
 tests/test_rbac.py::test_admin_only_user_admin_endpoints PASSED          [100%]
 
-============================= 17 passed in 14.43s ==============================
+============================= 17 passed in 31.93s ==============================
