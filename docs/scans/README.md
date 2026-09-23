@@ -53,17 +53,33 @@ customer, two independent vendors, and an admin.
 
 ## Static analysis (`bandit`)
 
-Full output: `bandit_report.txt` (re-run 2026-09-22, bandit 1.9.4). Seven
-findings remain; none require a further code change:
+Full output: `bandit_report.txt` (re-run 2026-09-23, bandit 1.9.4, after
+removing the legacy vulnerable/secure injection-demo routes -- see below).
+Five findings remain; none require a further code change:
 
 | # | Finding | File | Verdict |
 |---|---|---|---|
-| 1 | B608 possible SQL injection | `app.py:146` (`vulnerable_login`) | **Intentional.** This is the original OWASP-injection teaching route, kept deliberately vulnerable as the "before" side of the Injection control's evidence (see `owasp-control-table.md`, A03 row). It never establishes a session regardless of query result, so it cannot be used to actually log in as anyone. |
-| 2 | B608 possible SQL injection | `app.py:215` (`vulnerable_search`) | **Intentional**, same reasoning — the teaching "before" example; `search-secure` next to it is the parameterized "after". |
-| 3 | B104 bind to all interfaces | `app.py:325` (`app.run(host="0.0.0.0", ...)`) | **Accepted, by design.** This is a local lab/classroom server, not a multi-tenant production service; it must bind beyond loopback so the Android emulator (which reaches the host machine as `10.0.2.2`, a different address than `127.0.0.1` from the emulator's own network namespace) can connect at all — the same reason the debug mobile build is only ever allowed to talk to that one address (`network_security_config.xml`). |
-| 4 | B104 bind to all interfaces | `run_https.py:33` | **Same reasoning as #3** — this is the synthetic local HTTPS host standing in for a real classroom host (see `docs/scans/mobile/mitm_pinning_test.txt`); it needs to be reachable from the emulator the same way. |
-| 5 | B404 subprocess import | `db.py` | **Accepted, low risk.** Only used once, to run `chattr +a` on the audit log file (see the PATH-resolution fix below) — no other use of `subprocess` in the codebase. |
-| 6/7 | B105 "hardcoded password" | `templates.py` (`PASSWORD_RESET_*_BODY`) | **False positive.** Bandit's heuristic triggers on the variable *name* containing "password"; the value is an HTML template string, not a credential. **Correction made this pass**: this file previously carried a `# nosec B105` comment on the line *before* each flagged assignment — Bandit matches `# nosec` against the exact physical line number it reports (the assignment line itself), so a comment on the preceding line has no effect at all. It was silently not suppressing anything, and the report still listed both as active findings even before this fix, contradicting what the comment implied. Since these are multi-line triple-quoted string assignments, an inline trailing `# nosec` on the same line isn't safe either — anything after `"""` on that line becomes part of the string's literal content, which would inject stray text into the rendered HTML page. The comments were corrected to accurately describe the reasoning without falsely claiming suppression; the findings remain visible in the report by design, with this explanation as the record of review. |
+| 1 | B104 bind to all interfaces | `app.py:184` (`app.run(host="0.0.0.0", ...)`) | **Accepted, by design.** This is a local lab/classroom server, not a multi-tenant production service; it must bind beyond loopback so the Android emulator (which reaches the host machine as `10.0.2.2`, a different address than `127.0.0.1` from the emulator's own network namespace) can connect at all — the same reason the debug mobile build is only ever allowed to talk to that one address (`network_security_config.xml`). |
+| 2 | B104 bind to all interfaces | `run_https.py:33` | **Same reasoning as #1** — this is the synthetic local HTTPS host standing in for a real classroom host (see `docs/scans/mobile/mitm_pinning_test.txt`); it needs to be reachable from the emulator the same way. |
+| 3 | B404 subprocess import | `db.py` | **Accepted, low risk.** Only used once, to run `chattr +a` on the audit log file (see the PATH-resolution fix below) — no other use of `subprocess` in the codebase. |
+| 4/5 | B105 "hardcoded password" | `templates.py` (`PASSWORD_RESET_*_BODY`) | **False positive.** Bandit's heuristic triggers on the variable *name* containing "password"; the value is an HTML template string, not a credential. **Correction made in an earlier pass**: this file previously carried a `# nosec B105` comment on the line *before* each flagged assignment — Bandit matches `# nosec` against the exact physical line number it reports (the assignment line itself), so a comment on the preceding line has no effect at all. It was silently not suppressing anything, and the report still listed both as active findings even before this fix, contradicting what the comment implied. Since these are multi-line triple-quoted string assignments, an inline trailing `# nosec` on the same line isn't safe either — anything after `"""` on that line becomes part of the string's literal content, which would inject stray text into the rendered HTML page. The comments were corrected to accurately describe the reasoning without falsely claiming suppression; the findings remain visible in the report by design, with this explanation as the record of review. |
+
+**The two B608 "possible SQL injection" findings that used to be here are
+gone, not suppressed**: the legacy `/login`, `/login-secure`, `/search`,
+`/search-secure` demo routes (`vulnerable_login`/`vulnerable_search` and
+their parameterized `secure_*` counterparts) were removed from `app.py`
+entirely on 2026-09-23, along with their now-unused `LOGIN_BODY`/
+`SEARCH_BODY` templates and their nav links on the homepage. They are no
+longer reachable on the Web (`404`) and were never reachable via the API
+(`api_*.py` is a completely separate blueprint that never routed through
+these). Confirmed via `curl` after the removal, and the full test suite
+(17/17) and a fresh bandit run both pass unchanged otherwise. This does
+**not** weaken the actual Injection (A03) control: the real evidence for
+that control was always the parameterized-query pattern used throughout
+the live application (`db.py`/`products.py`/`users_admin.py`/
+`auth_service.py`, every query binds `?` params), which these two legacy
+routes never touched — removing a redundant "vulnerable-on-purpose" demo
+pair doesn't remove any actual protection.
 
 Note on `products.py`/`users_admin.py`: their UPDATE-statement f-strings
 (hardcoded `"<column> = ?"` fragments from a fixed allowlist, never user
@@ -82,12 +98,15 @@ confirms 3 suppressions took effect (`db.py:201`, `products.py:123`,
   hardening step with a warning if `chattr` isn't found, instead of
   trusting `$PATH`. Confirmed fixed: B607 no longer appears in
   `bandit_report.txt`.
-- The `templates.py` B105 nosec-placement bug described in row 6/7 above.
+- The `templates.py` B105 nosec-placement bug described in row 4/5 above.
+- The legacy injection-demo routes removed entirely (see above) —
+  eliminates rather than suppresses the two B608 findings that used to be
+  rows 1/2 here.
 
-**OWASP mapping**: A03 - Injection (rows 1/2, the deliberate teaching
-example; the `products.py`/`users_admin.py` pattern noted above is the
-confirmed-safe counterpart), A05 - Security Misconfiguration (rows 3/4, and
-the PATH-resolution fix).
+**OWASP mapping**: A03 - Injection (the `products.py`/`users_admin.py`
+parameterized-query pattern noted above, and the negative-testing note at
+the top of this file), A05 - Security Misconfiguration (rows 1/2, and the
+PATH-resolution fix).
 
 ## SBOM
 

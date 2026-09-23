@@ -92,61 +92,11 @@ INDEX_BODY = """
   <li><a href="/password-reset/request">Forgot password</a></li>
   <li><a href="/products">Product search (role-scoped)</a></li>
 </ul>
-<h2>Original OWASP injection lab (kept for the Injection control's evidence)</h2>
+<h2>Admin utilities (audit trail)</h2>
 <ul>
-  <li><a href="/login">Vulnerable Login</a></li>
-  <li><a href="/login-secure">Secure Login</a></li>
-  <li><a href="/search">Vulnerable Search</a></li>
-  <li><a href="/search-secure">Secure Search</a></li>
   <li><a href="/reset-db">Reset Database</a> (admin only)</li>
   <li><a href="/audit-log">Audit Log</a> (admin only)</li>
 </ul>
-"""
-
-LOGIN_BODY = """
-<h1>{{ title }}</h1>
-<p>{{ description }}</p>
-<form method="post">
-  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-  <p>Username: <input name="username" value="{{ username }}"></p>
-  <p>Password: <input name="password" type="password"></p>
-  <button type="submit">Login</button>
-</form>
-{% if error %}<div class="err"><strong>Error:</strong> {{ error }}</div>{% endif %}
-{% if logged_in_user %}
-  <div class="warn">logged in as {{ logged_in_user }} ({{ logged_in_role }}).</div>
-{% elif attempted %}<p>Login failed.</p>{% endif %}
-{% if sql_display %}
-  <h3>SQL executed by the application</h3><pre>{{ sql_display }}</pre>
-  {% if sql_params is defined %}
-    <h3>Parameters bound separately (never concatenated into the SQL string)</h3>
-    <pre>{{ sql_params }}</pre>
-  {% endif %}
-{% endif %}
-"""
-
-SEARCH_BODY = """
-<h1>{{ title }}</h1>
-<p>{{ description }}</p>
-<form method="post">
-  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-  <input name="term" placeholder="Search products" value="{{ term }}">
-  <button type="submit">Search</button>
-</form>
-{% if error %}<div class="err"><strong>SQL error:</strong> {{ error }}</div>{% endif %}
-<h3>Results</h3>
-<ul>
-  {% for r in rows %}
-    <li>{{ r['name'] }} — {{ r['category'] }} — ${{ '%.2f'|format(r['price']) }}</li>
-  {% else %}<li>No results.</li>{% endfor %}
-</ul>
-{% if sql_display %}
-  <h3>SQL executed by the application</h3><pre>{{ sql_display }}</pre>
-  {% if sql_params is defined %}
-    <h3>Parameters bound separately (never concatenated into the SQL string)</h3>
-    <pre>{{ sql_params }}</pre>
-  {% endif %}
-{% endif %}
 """
 
 AUDIT_LOG_BODY = """
