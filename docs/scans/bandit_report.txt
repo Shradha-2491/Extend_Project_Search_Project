@@ -1,34 +1,13 @@
-Run started:2026-09-22 06:01:58.925708+00:00
+Run started:2026-09-23 06:12:45.141092+00:00
 
 Test results:
->> Issue: [B608:hardcoded_sql_expressions] Possible SQL injection vector through string-based query construction.
-   Severity: Medium   Confidence: Low
-   CWE: CWE-89 (https://cwe.mitre.org/data/definitions/89.html)
-   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html
-   Location: ./app.py:146:15
-145	        ctx["attempted"] = True
-146	        sql = ("SELECT id, username, role FROM users "
-147	               f"WHERE username = '{username}' AND password = '{password}'")
-148	        ctx["sql_display"] = sql
-
---------------------------------------------------
->> Issue: [B608:hardcoded_sql_expressions] Possible SQL injection vector through string-based query construction.
-   Severity: Medium   Confidence: Low
-   CWE: CWE-89 (https://cwe.mitre.org/data/definitions/89.html)
-   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b608_hardcoded_sql_expressions.html
-   Location: ./app.py:215:16
-214	        ctx["term"] = term
-215	        sql = f"SELECT id, name, category, price FROM products WHERE name LIKE '%{term}%'"
-216	        ctx["sql_display"] = sql
-
---------------------------------------------------
 >> Issue: [B104:hardcoded_bind_all_interfaces] Possible binding to all interfaces.
    Severity: Medium   Confidence: Medium
    CWE: CWE-605 (https://cwe.mitre.org/data/definitions/605.html)
    More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b104_hardcoded_bind_all_interfaces.html
-   Location: ./app.py:325:17
-324	    db.init_audit_flatfile()
-325	    app.run(host="0.0.0.0", port=5001, debug=False, threaded=True)
+   Location: ./app.py:184:17
+183	    db.init_audit_flatfile()
+184	    app.run(host="0.0.0.0", port=5001, debug=False, threaded=True)
 
 --------------------------------------------------
 >> Issue: [B404:blacklist] Consider possible security implications associated with the subprocess module.
@@ -65,21 +44,21 @@ Test results:
    Severity: Low   Confidence: Medium
    CWE: CWE-259 (https://cwe.mitre.org/data/definitions/259.html)
    More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b105_hardcoded_password_string.html
-   Location: ./templates.py:233:30
-232	# false-positive explanation.)
-233	PASSWORD_RESET_REQUEST_BODY = """
-234	<h1>Forgot password</h1>
-235	<form method="post">
-236	  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-237	  <p>Username or email: <input name="identifier"></p>
-238	  <button type="submit">Send reset instructions</button>
-239	</form>
-240	{% if sent %}
-241	  <div class="ok">If an account exists, reset instructions were written to
-242	  <code>backend/mail_outbox/</code> (this lab has no real mail relay).</div>
-243	{% endif %}
-244	"""
-245	
+   Location: ./templates.py:183:30
+182	# false-positive explanation.)
+183	PASSWORD_RESET_REQUEST_BODY = """
+184	<h1>Forgot password</h1>
+185	<form method="post">
+186	  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+187	  <p>Username or email: <input name="identifier"></p>
+188	  <button type="submit">Send reset instructions</button>
+189	</form>
+190	{% if sent %}
+191	  <div class="ok">If an account exists, reset instructions were written to
+192	  <code>backend/mail_outbox/</code> (this lab has no real mail relay).</div>
+193	{% endif %}
+194	"""
+195	
 
 --------------------------------------------------
 >> Issue: [B105:hardcoded_password_string] Possible hardcoded password: '
@@ -96,25 +75,25 @@ Test results:
    Severity: Low   Confidence: Medium
    CWE: CWE-259 (https://cwe.mitre.org/data/definitions/259.html)
    More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b105_hardcoded_password_string.html
-   Location: ./templates.py:247:30
-246	# Same false positive as PASSWORD_RESET_REQUEST_BODY above.
-247	PASSWORD_RESET_CONFIRM_BODY = """
-248	<h1>Reset password</h1>
-249	<form method="post">
-250	  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-251	  <p>Reset token: <input name="token" value="{{ token }}"></p>
-252	  <p>New password (min 10 chars): <input name="new_password" type="password"></p>
-253	  <button type="submit">Reset</button>
-254	</form>
-255	{% if error %}<div class="err">{{ error }}</div>{% endif %}
-256	{% if success %}<div class="ok">Password updated. <a href="/login2">Log in</a>.</div>{% endif %}
-257	"""
-258	
+   Location: ./templates.py:197:30
+196	# Same false positive as PASSWORD_RESET_REQUEST_BODY above.
+197	PASSWORD_RESET_CONFIRM_BODY = """
+198	<h1>Reset password</h1>
+199	<form method="post">
+200	  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+201	  <p>Reset token: <input name="token" value="{{ token }}"></p>
+202	  <p>New password (min 10 chars): <input name="new_password" type="password"></p>
+203	  <button type="submit">Reset</button>
+204	</form>
+205	{% if error %}<div class="err">{{ error }}</div>{% endif %}
+206	{% if success %}<div class="ok">Password updated. <a href="/login2">Log in</a>.</div>{% endif %}
+207	"""
+208	
 
 --------------------------------------------------
 
 Code scanned:
-	Total lines of code: 2269
+	Total lines of code: 2095
 	Total lines skipped (#nosec): 0
 	Total potential issues skipped due to specifically being disabled (e.g., #nosec BXXX): 3
 
@@ -122,11 +101,11 @@ Run metrics:
 	Total issues (by severity):
 		Undefined: 0
 		Low: 3
-		Medium: 4
+		Medium: 2
 		High: 0
 	Total issues (by confidence):
 		Undefined: 0
-		Low: 2
+		Low: 0
 		Medium: 4
 		High: 1
 Files skipped (0):

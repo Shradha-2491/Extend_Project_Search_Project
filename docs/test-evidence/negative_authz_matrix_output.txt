@@ -1,0 +1,47 @@
+=== Setting up: logging in seed accounts, enrolling MFA fresh ===
+
+=== Admin creates a second vendor + their own product, for cross-vendor tests ===
+
+=== CUSTOMER trying vendor/admin-only operations (all must be denied) ===
+[PASS] customer cannot create a product (expect 403)
+[PASS] customer cannot change a price (expect 403)
+[PASS] customer cannot patch product fields (expect 403)
+[PASS] customer cannot delete a product (expect 403)
+[PASS] customer cannot list users (expect 403)
+[PASS] customer cannot create a user (expect 403)
+[PASS] customer cannot read the audit log (expect 403)
+
+=== CUSTOMER information-disclosure check (role-scoped field visibility) ===
+[PASS] customer's search response never includes cost/stock fields
+[PASS] customer never sees inactive/deactivated listings
+
+=== VENDOR trying admin-only operations (all must be denied) ===
+[PASS] vendor cannot list users (expect 403)
+[PASS] vendor cannot change a user's role (expect 403)
+[PASS] vendor cannot deactivate a user (expect 403)
+[PASS] vendor cannot read the audit log (expect 403)
+
+=== VENDOR A trying to touch VENDOR B's product (anti-IDOR, all must be denied) ===
+[PASS] vendor A cannot change vendor B's price (expect 404, not 403 -- hides existence)
+[PASS] vendor A cannot patch vendor B's product fields (expect 404)
+[PASS] vendor A cannot delete vendor B's product (expect 404)
+
+=== VENDOR's own search results only show their own inventory ===
+[PASS] vendor A's search never returns vendor B's product
+
+=== No token / bad token on protected endpoints ===
+[PASS] no bearer token -> 401 on a protected endpoint
+[PASS] garbage bearer token -> 401
+[PASS] no token on admin endpoint -> 401, not the 403 a valid-but-wrong-role token gets
+
+=== Privilege escalation at registration ===
+[PASS] registration accepted (expect 2xx)
+[PASS] self-registered user got role='customer', NOT the requested 'admin'
+
+=== Positive control: ADMIN can do all of the above (restrictions aren't overly broad) ===
+[PASS] admin CAN list users
+[PASS] admin CAN read the audit log
+[PASS] admin CAN patch any vendor's product
+
+============================================================
+25/25 checks passed

@@ -53,4 +53,8 @@ def test_vendor_cannot_change_price_of_others_product(client):
     scott_token = login_and_verify_mfa(client, "scott", "tiger")
     resp = client.patch("/api/v1/products/1/price", headers=_headers(scott_token, "x"),
                          json={"price": 1, "version": 1})
-    assert resp.status_code == 403
+    # 404, not 403 -- same anti-enumeration reasoning as the other
+    # ownership-checked product endpoints (never confirm an id exists to a
+    # non-owning vendor).
+    assert resp.status_code == 404
+    assert resp.get_json()["error"] == "not_found_or_forbidden"

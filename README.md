@@ -1,3 +1,6 @@
+Roll No.: CS25MTECH12018
+Name: Shradha Sanjaykant Suryawanshi
+
 # Extended Product & Product Search — Web, API, Mobile
 
 Extension of the original OWASP-injection teaching lab into a full product
@@ -72,6 +75,7 @@ python3 -m pytest tests/ -v                 # 17 tests: RBAC, price protection, 
 
 python3 ../docs/test-evidence/concurrency_price_race.py
 python3 ../docs/test-evidence/resilience_induced_delay.py
+python3 ../docs/test-evidence/negative_authz_matrix.py   # needs a freshly (re)started backend
 
 bandit -r . -x ./.venv,./tests            # docs/scans/bandit_report.txt has the last run
 pip-audit -r requirements.txt             # docs/scans/pip_audit_after_fix.txt has the last run
@@ -162,27 +166,99 @@ point at a **locally-generated synthetic HTTPS host** instead of a real one:
 ```bash
 cd backend
 mkdir -p certs
+# primary (actively served) cert -- gets bundled into the release APK as its trust anchor
 openssl req -x509 -newkey rsa:2048 -nodes -days 3650 \
   -keyout certs/server.key -out certs/server.crt \
   -subj "/CN=10.0.2.2/O=Product Search Lab/OU=Synthetic Test CA" \
   -addext "subjectAltName=IP:10.0.2.2,IP:127.0.0.1"
+cp certs/server.crt ../mobile/Product_Search_Project/app/src/release/res/raw/lab_test_ca.pem
+
+# backup cert -- pinned but never served, so the cert can rotate later without bricking installs
+openssl req -x509 -newkey rsa:2048 -nodes -days 3650 \
+  -keyout certs/server-next.key -out certs/server-next.crt \
+  -subj "/CN=10.0.2.2/O=Product Search Lab/OU=Synthetic Test CA (backup)" \
+  -addext "subjectAltName=IP:10.0.2.2,IP:127.0.0.1"
+
+# each cert's SHA-256 SPKI pin -- goes in network_security_config.xml's <pin-set>
+openssl x509 -in certs/server.crt -pubkey -noout | openssl pkey -pubin -outform der \
+  | openssl dgst -sha256 -binary | openssl enc -base64
+openssl x509 -in certs/server-next.crt -pubkey -noout | openssl pkey -pubin -outform der \
+  | openssl dgst -sha256 -binary | openssl enc -base64
+
 python3 run_https.py   # serves the SAME app on :5443 over HTTPS,
                         # alongside `python3 app.py` on :5001 for HTTP
 ```
 
 The release build's `API_BASE_URL` (`https://10.0.2.2:5443/`) and
 `network_security_config.xml`'s pinned domain/certificate are already
-wired to this synthetic host — see `docs/scans/mobile/mitm_pinning_test.txt`
-for the full walkthrough, including the actual negative test (a substituted
+wired to this synthetic host. To reproduce the actual MITM/pinning
+demonstration in `docs/scans/mobile/mitm_pinning_test.txt` (a substituted
 certificate gets rejected with `SSLHandshakeException`, proving the pinning
-fails closed) run against this exact setup.
+fails closed):
 
-Building, signing, and inspecting the release APK for secrets/debuggable
-flags, and verifying `TokenStore`'s encrypted local storage, are all
-runnable with the Android SDK's own `build-tools` (`apksigner`, `aapt`,
-`zipalign` — no extra tools needed for these three). Full step-by-step
-commands: `docs/doc-pdf/mobile-security-checklist.pdf`. Evidence from the last run:
-`docs/scans/mobile/`.
+```bash
+# a third, unpinned cert standing in for a MITM proxy's substituted leaf cert
+openssl req -x509 -newkey rsa:2048 -nodes -days 3650 \
+  -keyout certs/attacker.key -out certs/attacker.crt \
+  -subj "/CN=10.0.2.2/O=Attacker MITM Proxy/OU=Not Pinned" \
+  -addext "subjectAltName=IP:10.0.2.2,IP:127.0.0.1"
+
+# 1. log in on the release app with run_https.py serving certs/server.{crt,key} -- succeeds
+# 2. stop it, restart serving certs/attacker.{crt,key} on the same host:port, retry the same
+#    login -- fails closed with SSLHandshakeException before any request is sent
+# 3. switch back to certs/server.{crt,key} -- works again, confirming step 2 was specific to
+#    the substituted cert, not a general break
+python3 -c "
+from app import app
+app.run(host='0.0.0.0', port=5443, debug=False, threaded=True,
+         ssl_context=('certs/attacker.crt', 'certs/attacker.key'))
+"
+```
+
+### Building, signing, and inspecting the release APK
+
+Runnable with the Android SDK's own `build-tools` (`apksigner`, `aapt`,
+`zipalign`) — no extra tools needed for these three checks:
+
+```bash
+cd mobile/Product_Search_Project
+keytool -genkeypair -v -keystore release.jks -alias lab -keyalg RSA -keysize 2048 -validity 3650 \
+  -storepass labrelease123 -keypass labrelease123 \
+  -dname "CN=Lab Release, OU=SSE, O=IIT Hyderabad, L=Hyderabad, ST=Telangana, C=IN"
+./gradlew assembleRelease
+<sdk>/build-tools/<version>/apksigner sign --ks release.jks --ks-pass pass:labrelease123 \
+  --out app-release-signed.apk app/build/outputs/apk/release/app-release-unsigned.apk
+<sdk>/build-tools/<version>/apksigner verify --print-certs app-release-signed.apk
+```
+
+Keep `release.jks` out of the submission ZIP (it's a secret, not source —
+already gitignored via `mobile/**/*.jks`).
+
+```bash
+# secrets / debug-flag inspection -> docs/scans/mobile/apk_secret_scan.txt, apk_debuggable_check.txt
+unzip app-release-signed.apk -d apk-inspect
+cd apk-inspect
+strings classes.dex resources.arsc | grep -iE \
+  "client_secret|GOCSPX|api[_-]?key|BEGIN (RSA|EC) PRIVATE KEY|password.{0,3}="
+<sdk>/build-tools/<version>/aapt dump badging ../app-release-signed.apk \
+  | grep -i "application-debuggable"   # should print nothing
+<sdk>/build-tools/<version>/aapt dump xmltree ../app-release-signed.apk AndroidManifest.xml \
+  | grep -i allowBackup                # should show allowBackup=0x0 (false)
+# bonus: confirm R8 actually renamed the app's own classes
+strings classes.dex | grep -c "ProductRepository\|AppViewModel\|GoogleAuthConfig"   # expect 0
+cd ..
+
+# secure local storage -> docs/scans/mobile/local_storage_check.txt
+# (log in on any build first so there's a session to inspect)
+adb shell run-as com.example.product_search_project ls -la shared_prefs/ databases/
+adb shell run-as com.example.product_search_project cat shared_prefs/secure_auth_prefs.xml
+```
+
+A clean result: the secret grep finds nothing, the debuggable check prints
+nothing, `allowBackup=0x0`, the class-name grep finds 0 matches, and
+`secure_auth_prefs.xml` shows only encrypted key/value ciphertext — no
+readable `access_token`/`refresh_token` name or plaintext JWT anywhere.
+Evidence from the last run: `docs/scans/mobile/`.
 
 ## 5. Deliverables map
 
@@ -224,8 +300,20 @@ commands: `docs/doc-pdf/mobile-security-checklist.pdf`. Evidence from the last r
 The original lab's audit-log hash chain, CSRF protection, rate limiting,
 security headers, and parameterized-query pattern were kept and extended
 (not rewritten) — they already satisfied several of the assignment's
-"reusable, centralized" requirements. The original vulnerable/secure
-injection routes (`/login`, `/search` vs. `/login-secure`, `/search-secure`)
-are kept unchanged as the Injection row's before/after evidence in the
-OWASP table, and are functionally isolated from the new RBAC/session system
-(they never grant a real session).
+"reusable, centralized" requirements. `/reset-db` and `/audit-log`
+(admin-only) are reused as-is from the original lab as the audit-trail
+viewer for the whole system.
+
+The original lab's deliberately-vulnerable injection demo pair
+(`/login`/`/search`, string-concatenated SQL) and its parameterized
+`/login-secure`/`/search-secure` counterpart have been **removed entirely**
+(2026-09-23) — they're 404 on the Web now and were never reachable via the
+API (`api_*.py` is a separate blueprint that never routed through them).
+This doesn't weaken the Injection (A03) control: the actual evidence for
+that control was always the parameterized-query pattern used throughout
+the real application (`db.py`/`products.py`/`users_admin.py`/
+`auth_service.py`, every query binds `?` params, `like_escape()` escapes
+`LIKE` metacharacters) — see `docs/scans/README.md` for the full writeup,
+including the two Bandit B608 findings that disappeared (not suppressed)
+as a result of the removal, confirmed via a fresh full test run (17/17)
+and manual `curl` checks.
